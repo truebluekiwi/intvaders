@@ -1,4 +1,4 @@
-## intvaders.com Development Plan (v1.5)
+## intvaders.com Development Plan (v1.6)
 
 ### Document Version History
 | Version | Date       | Summary                                                          |
@@ -6,6 +6,7 @@
 | v1.3    | 2025-05-26 | Original uploaded version                                        |
 | v1.4    | 2025-05-26 | Refined structure, removed duplication, naming consistency       |
 | v1.5    | 2025-05-26 | Added phase deliverables, gameplay examples, updated architecture|
+| v1.6    | 2025-05-26 | Added staged development strategy prioritizing basic functionality|
 
 ---
 
@@ -197,6 +198,140 @@ The game continuously adapts to challenge even mathematical prodigies:
 - Full mobile and accessibility compliance  
 - End-to-end and load testing complete  
 - Deployment to production-ready infrastructure
+
+---
+
+## Staged Development Strategy
+
+### Overview
+This staged approach prioritizes building a solid foundation with basic functionality before adding complex features. Each stage delivers a working game that can be tested and validated before proceeding to the next level of complexity.
+
+### Stage 1: Core Foundation (MVP - Minimum Viable Product)
+**Objective**: Establish a playable basic game with essential mechanics  
+**Timeline**: 2-3 weeks  
+**Priority**: Critical Foundation
+
+**Core Features**:
+- Basic player ship movement (left/right, fire)
+- Simple alien grid formation (single-digit numbers 1-9)
+- Standard torpedo mode only (no mathematical combat yet)
+- Basic collision detection and alien destruction
+- Simple scoring system
+- Basic wave progression (aliens move down, new wave spawns)
+- Game over conditions (aliens reach bottom or player destroyed)
+
+**Technical Foundation**:
+- Next.js + React setup
+- Basic Phaser integration
+- Simple game loop
+- Basic asset loading (ship, aliens, projectiles)
+
+**Success Criteria**: Playable Space Invaders-style game with numbered aliens
+
+### Stage 2: Mathematical Combat System
+**Objective**: Add the core educational component  
+**Timeline**: 2-3 weeks  
+**Priority**: Core Educational Feature
+
+**Mathematical Features**:
+- Calculating Attack Mode implementation
+- Basic PEMDAS parser for simple operations (+, -, ×, ÷)
+- Equation validation system
+- Visual feedback for correct/incorrect calculations
+- FPP (Fire Power Points) system
+- Armor point rewards for successful calculations
+
+**Enhanced Gameplay**:
+- Dual combat system (standard vs calculating modes)
+- Basic alien health system (1-3 hits based on number value)
+- Simple UI for equation building
+
+**Success Criteria**: Players can solve math equations to destroy aliens with bonus rewards
+
+### Stage 3: Enhanced Gameplay & Progression
+**Objective**: Add depth and replayability  
+**Timeline**: 2-3 weeks  
+**Priority**: Engagement & Polish
+
+**Progression Features**:
+- Multi-wave difficulty scaling
+- Introduction of two-digit numbers
+- Basic power-up system (3-5 essential power-ups)
+- Simple achievement tracking
+- Local high score persistence
+
+**Polish Features**:
+- Improved visual effects
+- Sound effects and basic audio
+- Better UI/UX for mathematical input
+- Mobile responsiveness basics
+
+**Success Criteria**: Engaging progression system with increasing difficulty and rewards
+
+### Stage 4: User System & Persistence
+**Objective**: Add user accounts and data persistence  
+**Timeline**: 2-3 weeks  
+**Priority**: User Retention
+
+**Backend Features**:
+- User registration and authentication
+- Score persistence and history
+- Basic leaderboards
+- User profiles
+- Session tracking
+
+**Database Integration**:
+- Core database schema implementation
+- API endpoints for user data
+- Secure authentication system
+
+**Success Criteria**: Users can create accounts, save progress, and compete on leaderboards
+
+### Stage 5: Advanced Features & Competition
+**Objective**: Add competitive and advanced educational features  
+**Timeline**: 3-4 weeks  
+**Priority**: Advanced Engagement
+
+**Advanced Features**:
+- Complete power-up system
+- Learning analytics and adaptive difficulty
+- Advanced mathematical concepts (decimals, fractions)
+- Special alien types (Prime, Zero, Boss aliens)
+- Tournament system basics
+
+**Success Criteria**: Full educational feature set with competitive elements
+
+### Stage 6: Multiplayer & Final Polish
+**Objective**: Complete the full vision  
+**Timeline**: 3-4 weeks  
+**Priority**: Platform Completion
+
+**Final Features**:
+- Real-time multiplayer
+- Advanced competitive modes
+- Full mobile optimization
+- Accessibility compliance
+- Performance optimization
+- Production deployment
+
+**Success Criteria**: Production-ready platform with full feature set
+
+### Benefits of This Staged Approach
+
+1. **Early Validation**: Get a playable game quickly to test core mechanics
+2. **Iterative Feedback**: Each stage builds on proven foundations
+3. **Risk Mitigation**: Complex features are added only after basics are solid
+4. **Motivation**: Working game at each stage maintains momentum
+5. **Flexibility**: Can pivot or adjust based on testing results
+6. **Resource Management**: Easier to estimate time and effort for each stage
+
+### Stage Dependencies & Critical Path
+
+- **Stage 1 → Stage 2**: Core game must be stable before adding math system
+- **Stage 2 → Stage 3**: Math combat must work before adding complexity
+- **Stage 3 → Stage 4**: Local gameplay must be polished before adding backend
+- **Stage 4 → Stage 5**: User system must be secure before advanced features
+- **Stage 5 → Stage 6**: Single-player must be complete before multiplayer
 
 ---
 
