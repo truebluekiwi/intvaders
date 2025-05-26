@@ -18,15 +18,64 @@ MathVaders transforms the classic Space Invaders gameplay into an educational ma
 
 The game features infinite difficulty scaling, strict PEMDAS compliance, competitive multiplayer modes, and adaptive educational features.
 
-## Technology Stack
+## Framework Choice Rationale
+
+### Why Next.js + React + Phaser.js?
+
+**Next.js Benefits:**
+- **Full-stack framework**: Built-in API routes eliminate need for separate backend setup initially
+- **SEO optimization**: Server-side rendering for marketing pages and leaderboards
+- **Performance**: Automatic code splitting, image optimization, and caching
+- **Developer Experience**: Hot reload, TypeScript support, and excellent tooling
+- **Deployment**: Seamless integration with Vercel for easy scaling
+
+**React Integration:**
+- **Component-based UI**: Perfect for HUD elements, menus, and game interface
+- **State Management**: Redux for complex game state outside of Phaser
+- **Ecosystem**: Vast library ecosystem for UI components and utilities
+- **Team Familiarity**: Most developers comfortable with React patterns
+
+**Phaser.js Advantages:**
+- **Game-focused**: Built specifically for 2D games with optimized rendering
+- **Physics Engine**: Built-in Arcade Physics perfect for collision detection
+- **Asset Management**: Comprehensive loading and caching system
+- **Audio System**: Advanced audio management with spatial sound
+- **Animation System**: Tweening and sprite animation built-in
+- **Performance**: WebGL rendering with Canvas fallback
+- **Mathematical Precision**: Better handling of game mathematics than vanilla Canvas
+
+**Integration Strategy:**
+```typescript
+// Phaser integrated into React component
+export default function GameCanvas() {
+  const gameRef = useRef<Phaser.Game | null>(null);
+  
+  useEffect(() => {
+    if (!gameRef.current) {
+      gameRef.current = new Phaser.Game({
+        type: Phaser.AUTO,
+        parent: 'game-container',
+        scene: [MenuScene, GameScene, PauseScene],
+        physics: { default: 'arcade' }
+      });
+    }
+    
+    return () => gameRef.current?.destroy(true);
+  }, []);
+  
+  return <div id="game-container" className="w-full h-full" />;
+}
+```
 
 ### Frontend
-- **Framework**: React 18 + TypeScript
-- **Game Rendering**: HTML5 Canvas API
+- **Meta Framework**: Next.js 14+ with App Router
+- **UI Framework**: React 18 + TypeScript
+- **Game Engine**: Phaser.js 3.7+ integrated with React
 - **State Management**: Redux Toolkit + RTK Query
 - **Styling**: Tailwind CSS + Custom CSS
-- **Build Tool**: Vite
+- **Build Tool**: Next.js built-in (Webpack/Turbopack)
 - **Testing**: Jest + React Testing Library + Cypress
+- **Deployment**: Vercel (seamless Next.js integration)
 
 ### Backend
 - **Runtime**: Node.js 18+ with Express
@@ -61,18 +110,20 @@ The game features infinite difficulty scaling, strict PEMDAS compliance, competi
 **Objective**: Establish foundational game mechanics and rendering system
 
 #### Week 1: Project Setup & Architecture
-- Initialize React + TypeScript project with Vite
-- Set up Canvas-based game engine architecture
-- Implement basic game loop (60fps fixed timestep)
-- Create component structure for game UI
+- Initialize Next.js 14+ project with TypeScript and App Router
+- Set up Phaser.js 3.7+ integration with React components
+- Configure Phaser game scenes and basic game loop (60fps)
+- Create Next.js page structure and React component hierarchy
 - Set up development environment (ESLint, Prettier, Husky)
+- Configure Vercel deployment pipeline
 
-#### Week 2: Basic Game Mechanics
-- Implement player ship movement (left/right)
-- Create alien spawn system and basic AI movement
-- Add collision detection system
-- Implement standard torpedo firing and alien destruction
-- Basic score tracking and wave progression
+#### Week 2: Phaser.js Game Mechanics
+- Implement Phaser scenes (MenuScene, GameScene, LeaderboardScene)
+- Create player ship sprite with Phaser physics
+- Set up alien spawn system using Phaser Groups and Tweens
+- Add collision detection using Phaser's built-in physics
+- Implement standard torpedo firing with Phaser projectile system
+- Basic score tracking integrated with React state management
 
 #### Week 3: Visual Systems
 - Design and implement retro pixel art assets
@@ -263,19 +314,29 @@ The game features infinite difficulty scaling, strict PEMDAS compliance, competi
 
 ### Frontend Architecture
 ```
+app/                     # Next.js App Router
+├── (auth)/             # Route groups for authentication
+├── game/               # Game page and components
+├── leaderboard/        # Leaderboard pages
+├── profile/            # User profile pages
+├── api/                # Next.js API routes
+└── globals.css         # Global styles
+
 src/
-├── components/           # Reusable UI components
-├── game/                # Game engine and logic
-│   ├── engine/          # Core game engine
-│   ├── entities/        # Game objects (Player, Alien, Torpedo)
-│   ├── systems/         # Game systems (Rendering, Input, Audio)
-│   └── math/            # Mathematical validation and logic
-├── pages/               # Application pages
-├── hooks/               # Custom React hooks
-├── store/               # Redux store and slices
-├── services/            # API and external service calls
-├── utils/               # Utility functions
-└── types/               # TypeScript type definitions
+├── components/         # Reusable React components
+│   ├── ui/            # UI components (buttons, modals, etc.)
+│   ├── game/          # Game-specific React components
+│   └── layout/        # Layout components
+├── game/              # Phaser.js game logic
+│   ├── scenes/        # Phaser scenes (Menu, Game, Pause, etc.)
+│   ├── entities/      # Game objects (Player, Alien, Torpedo)
+│   ├── systems/       # Game systems (Math validation, Audio)
+│   └── config/        # Phaser configuration
+├── hooks/             # Custom React hooks
+├── store/             # Redux store and slices
+├── lib/               # Utility libraries and configurations
+├── services/          # API service calls
+└── types/             # TypeScript type definitions
 ```
 
 ### Backend Architecture
