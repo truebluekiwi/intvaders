@@ -1,0 +1,58 @@
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Build output
+dist/
+build/
+out/
+.tmp/
+.cache/
+coverage/
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# VS Code workspace files
+.vscode/
+*.code-workspace
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# Env/config
+.env
+.env.*
+!.env.example
+
+# Lockfiles (optional: ignore only if using a different tool)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Web game specific
+*.bak
+*.tmp
+*.swp
+*.swo
+*.log
+*.map
+
+# Optional: ignore screenshots or media
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.mp4
+
+# Optional: ignore Firebase or Netlify local data
+.firebase/
+.netlify/
+functions/lib/
