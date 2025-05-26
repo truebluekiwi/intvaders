@@ -1,58 +1,97 @@
-# Dependency directories
+# -------------------
+# Node & Build Output
+# -------------------
 node_modules/
-jspm_packages/
-
-# Build output
 dist/
 build/
 out/
-.tmp/
+.next/
+.vercel/
 .cache/
 coverage/
 *.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# VS Code workspace files
-.vscode/
-*.code-workspace
-
-# OS-generated files
-.DS_Store
-Thumbs.db
-ehthumbs.db
-Icon?
-
-# Env/config
-.env
-.env.*
-!.env.example
-
-# Lockfiles (optional: ignore only if using a different tool)
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
-
-# Web game specific
-*.bak
+# -------------------
+# Static Assets & Generated Files
+# -------------------
+*.map
 *.tmp
+*.bak
 *.swp
 *.swo
+
+# -------------------
+# VS Code & JetBrains
+# -------------------
+.vscode/
+.idea/
+*.code-workspace
+
+# -------------------
+# Environment & Secrets
+# -------------------
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+!.env.example
+
+# -------------------
+# Testing & QA Tools
+# -------------------
+coverage/
+cypress/videos/
+cypress/screenshots/
+lighthouseci/
+
+# -------------------
+# TypeScript
+# -------------------
+*.tsbuildinfo
+
+# -------------------
+# Database & ORM
+# -------------------
+prisma/dev.db
+prisma/dev.db-journal
+*.sqlite
+*.sqlite-journal
+
+# -------------------
+# Docker
+# -------------------
+docker-compose.override.yml
+*.tar
+*.img
+*.containersetup
 *.log
-*.map
 
-# Optional: ignore screenshots or media
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.mp4
+# -------------------
+# Redis / PostgreSQL Runtime
+# -------------------
+dump.rdb
+*.pid
+*.sock
+*.log
 
-# Optional: ignore Firebase or Netlify local data
-.firebase/
-.netlify/
-functions/lib/
+# -------------------
+# CI/CD & Monitoring
+# -------------------
+.github/
+.DS_Store
+Thumbs.db
+logs/
+*.metrics
+*.report
+.sonar/
+
+# -------------------
+# OS-specific
+# -------------------
+ehthumbs.db
+Icon?
+Desktop.ini
