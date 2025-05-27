@@ -15,7 +15,7 @@
 **Game Title:** IntVaders (hosted at [intvaders.com](https://intvaders.com))  
 **Genre:** Educational Arcade Shooter  
 **Platform:** Web Browser (Desktop & Mobile)  
-**Target Audience:** Students, educators, math enthusiasts, competitive gamers  
+**Target Audience:** Students, educators, math enthusiasts, and competitive gamers  
 **Development Approach:** AI-assisted development via VS Code + Cline plugin  
 **Team:** 1 Project Manager + 1 Developer + AI Assistant (Claude Sonnet 4 via Cline)  
 **Development Philosophy:** AI-first development with human oversight and validation
