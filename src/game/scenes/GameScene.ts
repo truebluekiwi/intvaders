@@ -199,7 +199,18 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  private bulletHitAlien(bullet: any, alien: any): void {
+  private bulletHitAlien(
+    bullet:
+      | Phaser.Types.Physics.Arcade.GameObjectWithBody
+      | Phaser.Physics.Arcade.Body
+      | Phaser.Physics.Arcade.StaticBody
+      | Phaser.Tilemaps.Tile,
+    alien:
+      | Phaser.Types.Physics.Arcade.GameObjectWithBody
+      | Phaser.Physics.Arcade.Body
+      | Phaser.Physics.Arcade.StaticBody
+      | Phaser.Tilemaps.Tile
+  ): void {
     const bulletSprite = bullet as Bullet;
     const alienSprite = alien as Phaser.Physics.Arcade.Sprite;
 
@@ -219,7 +230,18 @@ export class GameScene extends Phaser.Scene {
     this.createExplosion(alienSprite.x, alienSprite.y);
   }
 
-  private alienBulletHitPlayer(bullet: any, player: any): void {
+  private alienBulletHitPlayer(
+    bullet:
+      | Phaser.Types.Physics.Arcade.GameObjectWithBody
+      | Phaser.Physics.Arcade.Body
+      | Phaser.Physics.Arcade.StaticBody
+      | Phaser.Tilemaps.Tile,
+    player:
+      | Phaser.Types.Physics.Arcade.GameObjectWithBody
+      | Phaser.Physics.Arcade.Body
+      | Phaser.Physics.Arcade.StaticBody
+      | Phaser.Tilemaps.Tile
+  ): void {
     const bulletSprite = bullet as Bullet;
     const playerSprite = player as Player;
 

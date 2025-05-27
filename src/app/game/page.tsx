@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function GamePage() {
   const gameRef = useRef<HTMLDivElement>(null);
-  const gameManagerRef = useRef<any>(null);
+  const gameManagerRef = useRef<
+    import('@/game/GameManager').GameManager | null
+  >(null);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
