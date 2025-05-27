@@ -5,15 +5,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player');
-    
+
     // Add to scene
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    
+
     // Set physics properties
     this.setCollideWorldBounds(true);
     this.setImmovable(true);
-    
+
     // Set origin to center
     this.setOrigin(0.5, 0.5);
   }

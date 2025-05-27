@@ -12,11 +12,11 @@ export class AlienGrid {
   constructor(scene: Phaser.Scene, wave: number) {
     this.scene = scene;
     this.aliens = scene.physics.add.group();
-    
+
     // Adjust difficulty based on wave
-    this.moveSpeed = Math.min(200, 50 + (wave * 10));
-    this.moveInterval = Math.max(300, 1000 - (wave * 50));
-    
+    this.moveSpeed = Math.min(200, 50 + wave * 10);
+    this.moveInterval = Math.max(300, 1000 - wave * 50);
+
     this.createGrid(wave);
   }
 
@@ -30,20 +30,24 @@ export class AlienGrid {
 
     for (let row = 0; row < rows; row++) {
       for (let col = 0; col < cols; col++) {
-        const x = startX + (col * spacingX);
-        const y = startY + (row * spacingY);
-        
+        const x = startX + col * spacingX;
+        const y = startY + row * spacingY;
+
         // Determine alien number (1-9) based on position and wave
         const alienNumber = ((row * cols + col) % 9) + 1;
-        
-        const alien = this.scene.physics.add.sprite(x, y, `alien${alienNumber}`);
+
+        const alien = this.scene.physics.add.sprite(
+          x,
+          y,
+          `alien${alienNumber}`
+        );
         alien.setOrigin(0.5, 0.5);
         alien.setImmovable(true);
-        
+
         // Store alien number as data for scoring
         alien.setData('number', alienNumber);
         alien.setData('health', this.getAlienHealth(alienNumber));
-        
+
         // Add number text overlay
         const numberText = this.scene.add.text(x, y, alienNumber.toString(), {
           fontSize: '14px',
@@ -53,7 +57,7 @@ export class AlienGrid {
         });
         numberText.setOrigin(0.5, 0.5);
         alien.setData('numberText', numberText);
-        
+
         this.aliens.add(alien);
       }
     }
@@ -79,11 +83,14 @@ export class AlienGrid {
 
   private moveGrid(): void {
     let shouldDrop = false;
-    
+
     // Check if any alien has reached the edge
     this.aliens.children.entries.forEach((alien) => {
       const sprite = alien as Phaser.Physics.Arcade.Sprite;
-      if (this.moveDirection > 0 && sprite.x > this.scene.cameras.main.width - 50) {
+      if (
+        this.moveDirection > 0 &&
+        sprite.x > this.scene.cameras.main.width - 50
+      ) {
         shouldDrop = true;
       } else if (this.moveDirection < 0 && sprite.x < 50) {
         shouldDrop = true;
@@ -96,9 +103,11 @@ export class AlienGrid {
       this.aliens.children.entries.forEach((alien) => {
         const sprite = alien as Phaser.Physics.Arcade.Sprite;
         sprite.y += this.dropDistance;
-        
+
         // Update number text position
-        const numberText = sprite.getData('numberText') as Phaser.GameObjects.Text;
+        const numberText = sprite.getData(
+          'numberText'
+        ) as Phaser.GameObjects.Text;
         if (numberText) {
           numberText.y += this.dropDistance;
         }
@@ -108,9 +117,11 @@ export class AlienGrid {
       this.aliens.children.entries.forEach((alien) => {
         const sprite = alien as Phaser.Physics.Arcade.Sprite;
         sprite.x += this.moveSpeed * this.moveDirection * 0.1;
-        
+
         // Update number text position
-        const numberText = sprite.getData('numberText') as Phaser.GameObjects.Text;
+        const numberText = sprite.getData(
+          'numberText'
+        ) as Phaser.GameObjects.Text;
         if (numberText) {
           numberText.x += this.moveSpeed * this.moveDirection * 0.1;
         }
@@ -121,7 +132,7 @@ export class AlienGrid {
   destroyAlien(alien: Phaser.Physics.Arcade.Sprite): void {
     const health = alien.getData('health') as number;
     const newHealth = health - 1;
-    
+
     if (newHealth <= 0) {
       // Destroy the alien completely
       const numberText = alien.getData('numberText') as Phaser.GameObjects.Text;
@@ -133,7 +144,7 @@ export class AlienGrid {
       // Reduce health and change appearance
       alien.setData('health', newHealth);
       alien.setTint(0xff0000); // Red tint to show damage
-      
+
       // Flash effect
       this.scene.time.delayedCall(200, () => {
         if (alien.active) {
@@ -164,14 +175,14 @@ export class AlienGrid {
 
   getAlienByNumber(number: number): Phaser.Physics.Arcade.Sprite | null {
     let foundAlien: Phaser.Physics.Arcade.Sprite | null = null;
-    
+
     this.aliens.children.entries.forEach((alien) => {
       const sprite = alien as Phaser.Physics.Arcade.Sprite;
       if (sprite.getData('number') === number && !foundAlien) {
         foundAlien = sprite;
       }
     });
-    
+
     return foundAlien;
   }
 }

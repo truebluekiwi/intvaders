@@ -1,12 +1,13 @@
 ## intvaders.com Development Plan (v1.6)
 
 ### Document Version History
-| Version | Date       | Summary                                                          |
-|---------|------------|------------------------------------------------------------------|
-| v1.3    | 2025-05-26 | Original uploaded version                                        |
-| v1.4    | 2025-05-26 | Refined structure, removed duplication, naming consistency       |
-| v1.5    | 2025-05-26 | Added phase deliverables, gameplay examples, updated architecture|
-| v1.6    | 2025-05-26 | Added staged development strategy prioritizing basic functionality|
+
+| Version | Date       | Summary                                                            |
+| ------- | ---------- | ------------------------------------------------------------------ |
+| v1.3    | 2025-05-26 | Original uploaded version                                          |
+| v1.4    | 2025-05-26 | Refined structure, removed duplication, naming consistency         |
+| v1.5    | 2025-05-26 | Added phase deliverables, gameplay examples, updated architecture  |
+| v1.6    | 2025-05-26 | Added staged development strategy prioritizing basic functionality |
 
 ---
 
@@ -22,7 +23,7 @@
 
 ---
 
-## Game Objectives Description **
+## Game Objectives Description \*\*
 
 # intvaders.com: Game Description & Objectives
 
@@ -33,9 +34,11 @@
 ## Core Gameplay Concept
 
 ### The Mathematical Battlefield
+
 Instead of traditional aliens, players face off against **stylized numerical invaders** - each alien is represented by a number (0-9) with a hostile, retro-futuristic design. These mathematical enemies descend from space in classic Space Invaders formation, but their defeat requires more than simple reflexes - it demands mathematical precision and strategic thinking.
 
 ### Visual Aesthetic
+
 - **Retro Pixel Art Style**: Classic 1980s arcade aesthetic with modern mathematical twists
 - **Numerical Aliens**: Each number (0-9) is stylized as a menacing alien entity with glowing edges, antennae, and hostile expressions
 - **Mathematical HUD**: Advanced heads-up display showing equation building, score tracking, and mathematical progress
@@ -44,15 +47,17 @@ Instead of traditional aliens, players face off against **stylized numerical inv
 ## Dual Combat System
 
 ### 1. Standard Torpedo Mode (Traditional Combat)
+
 - **Unlimited Ammunition**: Fire standard energy torpedoes at alien targets
 - **Resource Management**: Each shot consumes Fire Power Points (FPP)
 - **Brute Force Approach**: Higher-value aliens require multiple hits to destroy
- - Aliens 1-3: 1 hit to destroy
- - Aliens 4-6: 2 hits to destroy  
- - Aliens 7-9: 3 hits to destroy
+- Aliens 1-3: 1 hit to destroy
+- Aliens 4-6: 2 hits to destroy
+- Aliens 7-9: 3 hits to destroy
 - **Strategic Use**: Emergency option when mathematical solutions aren't immediately apparent
 
 ### 2. Calculating Attack Mode (Mathematical Combat)
+
 - **Zero FPP Cost**: Successful mathematical equations consume no Fire Power Points
 - **Multi-Shot Sequences**: Players must fire at aliens in specific mathematical order
 - **Equation Building**: Create valid mathematical expressions using alien numbers
@@ -62,6 +67,7 @@ Instead of traditional aliens, players face off against **stylized numerical inv
 ## Mathematical Combat Examples
 
 ### Simple Addition Attack
+
 1. Player selects Addition mode
 2. Targets alien showing "3" (first operand)
 3. Targets alien showing "5" (second operand)
@@ -70,11 +76,13 @@ Instead of traditional aliens, players face off against **stylized numerical inv
 6. **Result**: All three aliens destroyed, +8 armor points gained, zero FPP consumed
 
 ### Complex Multi-Operation Chain
+
 1. Available aliens: 2, 3, 4, 6, 12, 5, 17
 2. Player executes: 2 × 3 = 6, then 6 + 12 - 1 = 17
 3. **Result**: Six aliens destroyed in sequence, massive armor boost, zero FPP cost
 
 ### Strategic Pressure Scenario
+
 - Aliens approaching critical distance
 - Player must choose: Quick standard shots (costs FPP) or risk time for mathematical solution
 - **Risk/Reward**: Mathematical solutions provide better rewards but require more time and precision
@@ -82,6 +90,7 @@ Instead of traditional aliens, players face off against **stylized numerical inv
 ## Infinite Difficulty Progression
 
 ### Progressive Mathematical Complexity
+
 - **Waves 1-10**: Single digits (1-9) - Basic arithmetic foundations
 - **Waves 11-25**: Two digits (10-99) - Intermediate calculations
 - **Waves 26-50**: Three digits (100-999) - Advanced mental math
@@ -90,7 +99,9 @@ Instead of traditional aliens, players face off against **stylized numerical inv
 - **Waves 201+**: Irrational numbers (π, e), square roots, advanced mathematical concepts
 
 ### Adaptive Intelligence Scaling
+
 The game continuously adapts to challenge even mathematical prodigies:
+
 - **Early Waves**: 2 + 3 = 5
 - **Intermediate Waves**: 12 × 7 - 23 + 6 = 67
 - **Advanced Waves**: √144 × π + 15² - 87 = ?
@@ -98,6 +109,7 @@ The game continuously adapts to challenge even mathematical prodigies:
 ## Educational Objectives
 
 ### Primary Learning Goals
+
 1. **Mathematical Fluency**: Rapid mental calculation across all four basic operations
 2. **Order of Operations Mastery**: Strict PEMDAS compliance in complex equations
 3. **Number Sense Development**: Understanding numerical relationships and patterns
@@ -105,6 +117,7 @@ The game continuously adapts to challenge even mathematical prodigies:
 5. **Strategic Mathematical Thinking**: Choosing optimal equation paths under pressure
 
 ### Adaptive Learning System
+
 - **Individual Progress Tracking**: Separate analytics for +, -, ×, ÷ operations
 - **Weakness Identification**: System identifies struggling areas and provides targeted practice
 - **Personalized Challenges**: Custom alien waves based on learning needs
@@ -113,11 +126,13 @@ The game continuously adapts to challenge even mathematical prodigies:
 ## Competitive & Social Objectives
 
 ### Leaderboard Competition
+
 - **Global Rankings**: Worldwide competition for mathematical supremacy
 - **Custom Groups**: Create teams, classrooms, or friend competitions
 - **Multiple Metrics**: Score-based, accuracy-based, and educational progress rankings
 
 ### Competitive Game Modes
+
 1. **Battle Royale Math**: 100 players face identical waves, last mathematician standing wins
 2. **Speed Challenges**: Race to complete specific mathematical objectives
 3. **Accuracy Championships**: Perfect precision required, single mistake elimination
@@ -126,11 +141,13 @@ The game continuously adapts to challenge even mathematical prodigies:
 ## Strategic Depth & Replayability
 
 ### Power-Up System (Earned Through Mathematical Excellence)
+
 - **Mathematical Enhancers**: Equation hints, auto-parentheses, result doubling
 - **Combat Enhancers**: Armor boosts, FPP surges, time freeze abilities
 - **Strategic Tools**: Alien scanners, multi-shot capabilities, shield generators
 
 ### Dynamic Pressure System
+
 - **No Time Limits**: Pressure comes from alien advancement, not artificial timers
 - **Accelerating Threats**: Aliens move faster and group tighter as waves progress
 - **Strategic Positioning**: Players must balance mathematical thinking with spatial awareness
@@ -139,12 +156,14 @@ The game continuously adapts to challenge even mathematical prodigies:
 ## Long-Term Engagement Goals
 
 ### Educational Impact Objectives
+
 - **Measurable Learning Gains**: Track mathematical improvement over time
 - **Curriculum Integration**: Support classroom mathematics education
 - **Lifelong Learning**: Appeal to adult learners seeking mathematical challenges
 - **Mathematical Confidence**: Transform math anxiety into mathematical excitement
 
 ### Gaming Excellence Objectives
+
 - **Infinite Challenge**: Ensure even mathematical experts eventually reach their limits
 - **Competitive Integrity**: Fair play enforcement and anti-cheat systems
 - **Community Building**: Foster communities around mathematical achievement
@@ -153,12 +172,14 @@ The game continuously adapts to challenge even mathematical prodigies:
 ## Success Metrics
 
 ### Player Achievement Goals
+
 - **Mathematical Accuracy**: Improve calculation precision under pressure
 - **Speed Development**: Increase mathematical processing speed
 - **Complex Problem Solving**: Handle multi-step equations efficiently
 - **Educational Progress**: Demonstrable improvement in mathematical skills
 
 ### Platform Success Objectives
+
 - **User Engagement**: Average sessions >15 minutes with high return rates
 - **Educational Effectiveness**: Validated learning outcomes in mathematical skills
 - **Competitive Participation**: Active competitive community with regular tournaments
@@ -168,35 +189,41 @@ The game continuously adapts to challenge even mathematical prodigies:
 
 ## Explicit Deliverables by Development Phase
 
-**Phase 1 – Core Game Engine**  
-- VS Code environment with all extensions configured  
-- Next.js + React + Phaser integrated  
-- Basic gameplay loop implemented  
-- Player ship movement and torpedo mode functional  
+**Phase 1 – Core Game Engine**
+
+- VS Code environment with all extensions configured
+- Next.js + React + Phaser integrated
+- Basic gameplay loop implemented
+- Player ship movement and torpedo mode functional
 - Basic alien formation and wave progression
 
-**Phase 2 – Mathematical Combat**  
-- PEMDAS parser working with UI feedback  
-- Calculating Attack Mode integrated into core gameplay  
+**Phase 2 – Mathematical Combat**
+
+- PEMDAS parser working with UI feedback
+- Calculating Attack Mode integrated into core gameplay
 - Correct/incorrect calculation feedback and reward/penalty system active
 
-**Phase 3 – Backend & User System**  
-- Secure user login and registration  
-- Score history and leaderboard persistence  
+**Phase 3 – Backend & User System**
+
+- Secure user login and registration
+- Score history and leaderboard persistence
 - User profile and session tracking
 
-**Phase 4 – Educational & Power-Up Systems**  
-- All 3 power-up categories implemented with point system  
-- Learning analytics and adaptive difficulty working  
+**Phase 4 – Educational & Power-Up Systems**
+
+- All 3 power-up categories implemented with point system
+- Learning analytics and adaptive difficulty working
 - Achievement unlock and tracking operational
 
-**Phase 5 – Multiplayer & Competitive Modes**  
-- Real-time game sync via Socket.io  
+**Phase 5 – Multiplayer & Competitive Modes**
+
+- Real-time game sync via Socket.io
 - Matchmaking, tournaments, anti-cheat systems integrated
 
-**Phase 6 – Optimization & Launch**  
-- Full mobile and accessibility compliance  
-- End-to-end and load testing complete  
+**Phase 6 – Optimization & Launch**
+
+- Full mobile and accessibility compliance
+- End-to-end and load testing complete
 - Deployment to production-ready infrastructure
 
 ---
@@ -204,14 +231,17 @@ The game continuously adapts to challenge even mathematical prodigies:
 ## Staged Development Strategy
 
 ### Overview
+
 This staged approach prioritizes building a solid foundation with basic functionality before adding complex features. Each stage delivers a working game that can be tested and validated before proceeding to the next level of complexity.
 
 ### Stage 1: Core Foundation (MVP - Minimum Viable Product)
+
 **Objective**: Establish a playable basic game with essential mechanics  
 **Timeline**: 2-3 weeks  
 **Priority**: Critical Foundation
 
 **Core Features**:
+
 - Basic player ship movement (left/right, fire)
 - Simple alien grid formation (single-digit numbers 1-9)
 - Standard torpedo mode only (no mathematical combat yet)
@@ -221,6 +251,7 @@ This staged approach prioritizes building a solid foundation with basic function
 - Game over conditions (aliens reach bottom or player destroyed)
 
 **Technical Foundation**:
+
 - Next.js + React setup
 - Basic Phaser integration
 - Simple game loop
@@ -229,11 +260,13 @@ This staged approach prioritizes building a solid foundation with basic function
 **Success Criteria**: Playable Space Invaders-style game with numbered aliens
 
 ### Stage 2: Mathematical Combat System
+
 **Objective**: Add the core educational component  
 **Timeline**: 2-3 weeks  
 **Priority**: Core Educational Feature
 
 **Mathematical Features**:
+
 - Calculating Attack Mode implementation
 - Basic PEMDAS parser for simple operations (+, -, ×, ÷)
 - Equation validation system
@@ -242,6 +275,7 @@ This staged approach prioritizes building a solid foundation with basic function
 - Armor point rewards for successful calculations
 
 **Enhanced Gameplay**:
+
 - Dual combat system (standard vs calculating modes)
 - Basic alien health system (1-3 hits based on number value)
 - Simple UI for equation building
@@ -249,11 +283,13 @@ This staged approach prioritizes building a solid foundation with basic function
 **Success Criteria**: Players can solve math equations to destroy aliens with bonus rewards
 
 ### Stage 3: Enhanced Gameplay & Progression
+
 **Objective**: Add depth and replayability  
 **Timeline**: 2-3 weeks  
 **Priority**: Engagement & Polish
 
 **Progression Features**:
+
 - Multi-wave difficulty scaling
 - Introduction of two-digit numbers
 - Basic power-up system (3-5 essential power-ups)
@@ -261,6 +297,7 @@ This staged approach prioritizes building a solid foundation with basic function
 - Local high score persistence
 
 **Polish Features**:
+
 - Improved visual effects
 - Sound effects and basic audio
 - Better UI/UX for mathematical input
@@ -269,11 +306,13 @@ This staged approach prioritizes building a solid foundation with basic function
 **Success Criteria**: Engaging progression system with increasing difficulty and rewards
 
 ### Stage 4: User System & Persistence
+
 **Objective**: Add user accounts and data persistence  
 **Timeline**: 2-3 weeks  
 **Priority**: User Retention
 
 **Backend Features**:
+
 - User registration and authentication
 - Score persistence and history
 - Basic leaderboards
@@ -281,6 +320,7 @@ This staged approach prioritizes building a solid foundation with basic function
 - Session tracking
 
 **Database Integration**:
+
 - Core database schema implementation
 - API endpoints for user data
 - Secure authentication system
@@ -288,11 +328,13 @@ This staged approach prioritizes building a solid foundation with basic function
 **Success Criteria**: Users can create accounts, save progress, and compete on leaderboards
 
 ### Stage 5: Advanced Features & Competition
+
 **Objective**: Add competitive and advanced educational features  
 **Timeline**: 3-4 weeks  
 **Priority**: Advanced Engagement
 
 **Advanced Features**:
+
 - Complete power-up system
 - Learning analytics and adaptive difficulty
 - Advanced mathematical concepts (decimals, fractions)
@@ -302,11 +344,13 @@ This staged approach prioritizes building a solid foundation with basic function
 **Success Criteria**: Full educational feature set with competitive elements
 
 ### Stage 6: Multiplayer & Final Polish
+
 **Objective**: Complete the full vision  
 **Timeline**: 3-4 weeks  
 **Priority**: Platform Completion
 
 **Final Features**:
+
 - Real-time multiplayer
 - Advanced competitive modes
 - Full mobile optimization
@@ -338,6 +382,7 @@ This staged approach prioritizes building a solid foundation with basic function
 ## Gameplay Examples: Enemies, Bonuses, and Power-Ups
 
 **Special Alien Types:**
+
 - **Prime Aliens**: More armored; bonus points if destroyed using multiplication of primes.
 - **Zero Aliens**: Can only be eliminated using subtraction equations (e.g., 4 - 4 = 0).
 - **Boss Aliens**: Multi-digit numbers requiring multi-step equations.
@@ -345,22 +390,26 @@ This staged approach prioritizes building a solid foundation with basic function
 
 **Power-Up Categories:**
 
-*Mathematical Enhancers:*
+_Mathematical Enhancers:_
+
 - Equation Hint – 500 pts
 - Auto-Parentheses – 1000 pts
 - Double Result – 1500 pts
 
-*Combat Enhancers:*
+_Combat Enhancers:_
+
 - Armor Boost – 300 pts
 - FPP Surge – 400 pts
 - Time Freeze – 2000 pts
 
-*Strategic Tools:*
+_Strategic Tools:_
+
 - Alien Scanner – 750 pts
 - Multi-Shot – 1200 pts
 - Shield Generator – 2500 pts
 
 **Bonus Scenarios:**
+
 - **Speed Bonus**: Completing a correct equation within 2 seconds adds +50 pts
 - **Streak Multiplier**: Each 3 consecutive math kills increases points by 10%
 - **Complexity Bonus**: Solving using fractions or roots yields +100 pts
@@ -370,6 +419,7 @@ This staged approach prioritizes building a solid foundation with basic function
 ## Updated Technical Architecture
 
 ### Frontend Architecture
+
 ```
 app/
 ├── (auth)/             # Auth route group
@@ -397,6 +447,7 @@ src/
 ```
 
 ### Backend Architecture
+
 ```
 src/
 ├── api/                # REST endpoints
@@ -411,6 +462,7 @@ src/
 ```
 
 ### Database Schema
+
 ```sql
 -- Core Tables
 Users (id, email, password_hash, created_at)

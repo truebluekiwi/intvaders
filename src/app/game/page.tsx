@@ -33,7 +33,10 @@ export default function GamePage() {
   if (!isClient) {
     return (
       <div className="game-container">
-        <div className="flex items-center justify-center" style={{ width: '800px', height: '600px' }}>
+        <div
+          className="flex items-center justify-center"
+          style={{ width: '800px', height: '600px' }}
+        >
           <p className="text-xl text-cyan">Loading Game...</p>
         </div>
       </div>

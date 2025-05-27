@@ -29,39 +29,71 @@ export class GameOverScene extends Phaser.Scene {
     gameOverText.setOrigin(0.5);
 
     // Score display
-    const scoreText = this.add.text(width / 2, height / 2 - 40, `Final Score: ${this.finalScore}`, {
-      fontSize: '24px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    const scoreText = this.add.text(
+      width / 2,
+      height / 2 - 40,
+      `Final Score: ${this.finalScore}`,
+      {
+        fontSize: '24px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
     scoreText.setOrigin(0.5);
 
     // Wave display
-    const waveText = this.add.text(width / 2, height / 2, `Wave Reached: ${this.finalWave}`, {
-      fontSize: '24px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    const waveText = this.add.text(
+      width / 2,
+      height / 2,
+      `Wave Reached: ${this.finalWave}`,
+      {
+        fontSize: '24px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
     waveText.setOrigin(0.5);
 
     // Play Again button
-    const playAgainButton = this.add.rectangle(width / 2 - 100, height / 2 + 80, 180, 50, 0x00aa00);
-    const playAgainText = this.add.text(width / 2 - 100, height / 2 + 80, 'PLAY AGAIN', {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-      fontStyle: 'bold',
-    });
+    const playAgainButton = this.add.rectangle(
+      width / 2 - 100,
+      height / 2 + 80,
+      180,
+      50,
+      0x00aa00
+    );
+    const playAgainText = this.add.text(
+      width / 2 - 100,
+      height / 2 + 80,
+      'PLAY AGAIN',
+      {
+        fontSize: '18px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+        fontStyle: 'bold',
+      }
+    );
     playAgainText.setOrigin(0.5);
 
     // Menu button
-    const menuButton = this.add.rectangle(width / 2 + 100, height / 2 + 80, 180, 50, 0x0066cc);
-    const menuText = this.add.text(width / 2 + 100, height / 2 + 80, 'MAIN MENU', {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-      fontStyle: 'bold',
-    });
+    const menuButton = this.add.rectangle(
+      width / 2 + 100,
+      height / 2 + 80,
+      180,
+      50,
+      0x0066cc
+    );
+    const menuText = this.add.text(
+      width / 2 + 100,
+      height / 2 + 80,
+      'MAIN MENU',
+      {
+        fontSize: '18px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+        fontStyle: 'bold',
+      }
+    );
     menuText.setOrigin(0.5);
 
     // Make buttons interactive

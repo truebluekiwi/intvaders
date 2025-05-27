@@ -3,15 +3,15 @@ import * as Phaser from 'phaser';
 export class Bullet extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'bullet');
-    
+
     // Add to scene
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    
+
     // Set physics properties
     this.setActive(false);
     this.setVisible(false);
-    
+
     // Set origin to center
     this.setOrigin(0.5, 0.5);
   }

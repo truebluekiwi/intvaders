@@ -44,8 +44,12 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize input
     this.cursors = this.input.keyboard!.createCursorKeys();
-    this.spaceKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.enterKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+    this.spaceKey = this.input.keyboard!.addKey(
+      Phaser.Input.Keyboard.KeyCodes.SPACE
+    );
+    this.enterKey = this.input.keyboard!.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ENTER
+    );
 
     // Create game entities
     this.bullets = this.physics.add.group({
@@ -98,26 +102,26 @@ export class GameScene extends Phaser.Scene {
   private createPlaceholderAssets(): void {
     // Create colored rectangles as sprites
     const graphics = this.add.graphics();
-    
+
     // Player ship (cyan triangle)
     graphics.fillStyle(0x00ffff);
     graphics.fillTriangle(0, 20, 10, 0, 20, 20);
     graphics.generateTexture('player', 20, 20);
-    
+
     // Alien sprites (colored rectangles with numbers)
     for (let i = 1; i <= 9; i++) {
       graphics.clear();
-      graphics.fillStyle(0xff0000 + (i * 0x001100));
+      graphics.fillStyle(0xff0000 + i * 0x001100);
       graphics.fillRect(0, 0, 30, 20);
       graphics.generateTexture(`alien${i}`, 30, 20);
     }
-    
+
     // Bullet (small white rectangle)
     graphics.clear();
     graphics.fillStyle(0xffffff);
     graphics.fillRect(0, 0, 4, 8);
     graphics.generateTexture('bullet', 4, 8);
-    
+
     graphics.destroy();
   }
 
@@ -198,19 +202,19 @@ export class GameScene extends Phaser.Scene {
   private bulletHitAlien(bullet: any, alien: any): void {
     const bulletSprite = bullet as Bullet;
     const alienSprite = alien as Phaser.Physics.Arcade.Sprite;
-    
+
     bulletSprite.destroy();
-    
+
     // Get alien number from stored data
     const alienNumber = alienSprite.getData('number') || 1;
-    
+
     // Calculate score based on alien number
     const baseScore = alienNumber * 10;
     this.score += baseScore;
-    
+
     // Destroy alien
     this.alienGrid.destroyAlien(alienSprite);
-    
+
     // Add visual effect
     this.createExplosion(alienSprite.x, alienSprite.y);
   }
@@ -218,9 +222,9 @@ export class GameScene extends Phaser.Scene {
   private alienBulletHitPlayer(bullet: any, player: any): void {
     const bulletSprite = bullet as Bullet;
     const playerSprite = player as Player;
-    
+
     bulletSprite.destroy();
-    
+
     if (this.armor > 0) {
       this.armor -= 10;
     } else {
@@ -251,7 +255,7 @@ export class GameScene extends Phaser.Scene {
     this.wave++;
     this.alienGrid = new AlienGrid(this, this.wave);
     this.alienGrid.startMovement();
-    
+
     // Bonus for completing wave
     this.score += this.wave * 100;
     this.firepower = Math.min(100, this.firepower + 20);
@@ -266,7 +270,7 @@ export class GameScene extends Phaser.Scene {
 
   private createUI(): void {
     const padding = 20;
-    
+
     this.scoreText = this.add.text(padding, padding, `Score: ${this.score}`, {
       fontSize: '18px',
       color: '#ffffff',
@@ -279,30 +283,49 @@ export class GameScene extends Phaser.Scene {
       fontFamily: 'Arial, sans-serif',
     });
 
-    this.livesText = this.add.text(padding, padding + 50, `Lives: ${this.lives}`, {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    this.livesText = this.add.text(
+      padding,
+      padding + 50,
+      `Lives: ${this.lives}`,
+      {
+        fontSize: '18px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
 
-    this.firepowerText = this.add.text(padding, padding + 75, `FPP: ${this.firepower}`, {
-      fontSize: '18px',
-      color: '#00ff00',
-      fontFamily: 'Arial, sans-serif',
-    });
+    this.firepowerText = this.add.text(
+      padding,
+      padding + 75,
+      `FPP: ${this.firepower}`,
+      {
+        fontSize: '18px',
+        color: '#00ff00',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
 
-    this.armorText = this.add.text(padding, padding + 100, `Armor: ${this.armor}`, {
-      fontSize: '18px',
-      color: '#0088ff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    this.armorText = this.add.text(
+      padding,
+      padding + 100,
+      `Armor: ${this.armor}`,
+      {
+        fontSize: '18px',
+        color: '#0088ff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
 
-    this.modeText = this.add.text(this.cameras.main.width - padding, padding, 
-      this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE', {
-      fontSize: '16px',
-      color: this.isCalculatingMode ? '#ffff00' : '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    this.modeText = this.add.text(
+      this.cameras.main.width - padding,
+      padding,
+      this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE',
+      {
+        fontSize: '16px',
+        color: this.isCalculatingMode ? '#ffff00' : '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
     this.modeText.setOrigin(1, 0);
   }
 
@@ -312,7 +335,9 @@ export class GameScene extends Phaser.Scene {
     this.livesText.setText(`Lives: ${this.lives}`);
     this.firepowerText.setText(`FPP: ${this.firepower}`);
     this.armorText.setText(`Armor: ${this.armor}`);
-    this.modeText.setText(this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE');
+    this.modeText.setText(
+      this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE'
+    );
     this.modeText.setColor(this.isCalculatingMode ? '#ffff00' : '#ffffff');
   }
 }

@@ -7,7 +7,10 @@ export class MenuScene extends Phaser.Scene {
 
   preload(): void {
     // Create simple colored rectangles as placeholders for sprites
-    this.load.image('background', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+    this.load.image(
+      'background',
+      'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+    );
   }
 
   create(): void {
@@ -26,15 +29,26 @@ export class MenuScene extends Phaser.Scene {
     title.setOrigin(0.5);
 
     // Subtitle
-    const subtitle = this.add.text(width / 2, height / 3 + 60, 'Educational Arcade Shooter', {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    const subtitle = this.add.text(
+      width / 2,
+      height / 3 + 60,
+      'Educational Arcade Shooter',
+      {
+        fontSize: '18px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
     subtitle.setOrigin(0.5);
 
     // Start button
-    const startButton = this.add.rectangle(width / 2, height / 2 + 50, 200, 50, 0x00aa00);
+    const startButton = this.add.rectangle(
+      width / 2,
+      height / 2 + 50,
+      200,
+      50,
+      0x00aa00
+    );
     const startText = this.add.text(width / 2, height / 2 + 50, 'START GAME', {
       fontSize: '20px',
       color: '#ffffff',
@@ -58,13 +72,17 @@ export class MenuScene extends Phaser.Scene {
     });
 
     // Instructions
-    const instructions = this.add.text(width / 2, height - 100, 
-      'Use ARROW KEYS to move, SPACE to fire\nPress ENTER for Calculating Attack Mode', {
-      fontSize: '14px',
-      color: '#cccccc',
-      fontFamily: 'Arial, sans-serif',
-      align: 'center',
-    });
+    const instructions = this.add.text(
+      width / 2,
+      height - 100,
+      'Use ARROW KEYS to move, SPACE to fire\nPress ENTER for Calculating Attack Mode',
+      {
+        fontSize: '14px',
+        color: '#cccccc',
+        fontFamily: 'Arial, sans-serif',
+        align: 'center',
+      }
+    );
     instructions.setOrigin(0.5);
   }
 }

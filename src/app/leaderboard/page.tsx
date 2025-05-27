@@ -22,9 +22,7 @@ export default function LeaderboardPage() {
       <div className="container mx-auto px-4 py-16">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
-            LEADERBOARD
-          </h1>
+          <h1 className="text-5xl font-bold text-white mb-4">LEADERBOARD</h1>
           <p className="text-xl text-gray-300 mb-8">
             Top Mathematical Warriors
           </p>
@@ -42,7 +40,7 @@ export default function LeaderboardPage() {
                 <div>Wave</div>
               </div>
             </div>
-            
+
             <div className="divide-y divide-slate-700">
               {mockLeaderboard.map((entry) => (
                 <div
@@ -56,17 +54,21 @@ export default function LeaderboardPage() {
                           entry.rank === 1
                             ? 'text-yellow-400'
                             : entry.rank === 2
-                            ? 'text-gray-300'
-                            : entry.rank === 3
-                            ? 'text-amber-600'
-                            : 'text-white'
+                              ? 'text-gray-300'
+                              : entry.rank === 3
+                                ? 'text-amber-600'
+                                : 'text-white'
                         }`}
                       >
                         #{entry.rank}
                       </span>
                       {entry.rank <= 3 && (
                         <span className="ml-2 text-2xl">
-                          {entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : '🥉'}
+                          {entry.rank === 1
+                            ? '🥇'
+                            : entry.rank === 2
+                              ? '🥈'
+                              : '🥉'}
                         </span>
                       )}
                     </div>
@@ -92,7 +94,7 @@ export default function LeaderboardPage() {
           >
             Play Now
           </Link>
-          
+
           <Link
             href="/"
             className="bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-bold py-4 px-8 rounded-lg text-xl transition-all duration-300 transform hover:scale-105 shadow-lg"
@@ -108,16 +110,18 @@ export default function LeaderboardPage() {
             <h3 className="text-xl font-bold text-white mb-2">Highest Score</h3>
             <p className="text-2xl font-mono text-cyan-400">125,000</p>
           </div>
-          
+
           <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-lg border border-slate-700 text-center">
             <div className="text-purple-400 text-3xl mb-2">🌊</div>
             <h3 className="text-xl font-bold text-white mb-2">Highest Wave</h3>
             <p className="text-2xl font-mono text-purple-400">Wave 15</p>
           </div>
-          
+
           <div className="bg-slate-800/50 backdrop-blur-sm p-6 rounded-lg border border-slate-700 text-center">
             <div className="text-green-400 text-3xl mb-2">👥</div>
-            <h3 className="text-xl font-bold text-white mb-2">Active Players</h3>
+            <h3 className="text-xl font-bold text-white mb-2">
+              Active Players
+            </h3>
             <p className="text-2xl font-mono text-green-400">1,247</p>
           </div>
         </div>

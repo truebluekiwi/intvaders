@@ -199,7 +199,7 @@ a {
   .md\\:grid-cols-3 {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .sm\\:flex-row {
     flex-direction: row;
   }
