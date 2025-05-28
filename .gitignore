@@ -1,2 +1,5 @@
-node_modules
+# Don't commit build and dependency folders
+node_modules/
 .next/
+dist/
+.vercel/
