@@ -1,5 +1,97 @@
-# Don't commit build and dependency folders
+# -------------------
+# Node & Build Output
+# -------------------
 node_modules/
-.next/
 dist/
+build/
+out/
+.next/
 .vercel/
+.cache/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# -------------------
+# Static Assets & Generated Files
+# -------------------
+*.map
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# -------------------
+# VS Code & JetBrains
+# -------------------
+.vscode/
+.idea/
+*.code-workspace
+
+# -------------------
+# Environment & Secrets
+# -------------------
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+!.env.example
+
+# -------------------
+# Testing & QA Tools
+# -------------------
+coverage/
+cypress/videos/
+cypress/screenshots/
+lighthouseci/
+
+# -------------------
+# TypeScript
+# -------------------
+*.tsbuildinfo
+
+# -------------------
+# Database & ORM
+# -------------------
+prisma/dev.db
+prisma/dev.db-journal
+*.sqlite
+*.sqlite-journal
+
+# -------------------
+# Docker
+# -------------------
+docker-compose.override.yml
+*.tar
+*.img
+*.containersetup
+*.log
+
+# -------------------
+# Redis / PostgreSQL Runtime
+# -------------------
+dump.rdb
+*.pid
+*.sock
+*.log
+
+# -------------------
+# CI/CD & Monitoring
+# -------------------
+.github/
+.DS_Store
+Thumbs.db
+logs/
+*.metrics
+*.report
+.sonar/
+
+# -------------------
+# OS-specific
+# -------------------
+ehthumbs.db
+Icon?
+Desktop.ini
