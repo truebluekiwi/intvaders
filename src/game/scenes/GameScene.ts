@@ -17,6 +17,8 @@ export class GameScene extends Phaser.Scene {
   private firepower: number = 100;
   private armor: number = 0;
   private isCalculatingMode: boolean = false;
+  private lastAlienShootTime: number = 0;
+  private alienShootInterval: number = 2000; // milliseconds
 
   // UI elements
   private scoreText!: Phaser.GameObjects.Text;
@@ -75,6 +77,9 @@ export class GameScene extends Phaser.Scene {
 
     // Start alien movement
     this.alienGrid.startMovement();
+
+    // Initialize alien shooting timer
+    this.lastAlienShootTime = this.time.now;
   }
 
   update(): void {
@@ -84,6 +89,14 @@ export class GameScene extends Phaser.Scene {
     // Update entities
     this.player.update();
     this.alienGrid.update();
+
+    // Handle alien shooting
+    this.handleAlienShooting();
+
+    // Stop player movement when no keys are pressed
+    if (!this.cursors.left.isDown && !this.cursors.right.isDown) {
+      this.player.stopMovement();
+    }
 
     // Check for wave completion
     if (this.alienGrid.isEmpty()) {
@@ -269,6 +282,65 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  private handleAlienShooting(): void {
+    if (this.time.now - this.lastAlienShootTime > this.alienShootInterval) {
+      this.alienShoot();
+      this.lastAlienShootTime = this.time.now;
+      // Increase shooting frequency as waves progress
+      this.alienShootInterval = Math.max(800, 2000 - this.wave * 100);
+    }
+  }
+
+  private alienShoot(): void {
+    const aliens = this.alienGrid.getAliens().children.entries;
+    if (aliens.length === 0) return;
+
+    // Pick a random alien from the bottom row to shoot
+    const bottomRowAliens = this.getBottomRowAliens(
+      aliens as Phaser.Physics.Arcade.Sprite[]
+    );
+    if (bottomRowAliens.length === 0) return;
+
+    const shootingAlien = Phaser.Utils.Array.GetRandom(bottomRowAliens);
+    this.createAlienBullet(shootingAlien.x, shootingAlien.y + 10);
+  }
+
+  private getBottomRowAliens(
+    aliens: Phaser.Physics.Arcade.Sprite[]
+  ): Phaser.Physics.Arcade.Sprite[] {
+    const bottomRowAliens: Phaser.Physics.Arcade.Sprite[] = [];
+    const columnAliens: { [key: number]: Phaser.Physics.Arcade.Sprite[] } = {};
+
+    // Group aliens by column (x position)
+    aliens.forEach((alien) => {
+      const column = Math.round(alien.x / 50); // Assuming 50px spacing
+      if (!columnAliens[column]) {
+        columnAliens[column] = [];
+      }
+      columnAliens[column].push(alien);
+    });
+
+    // Get the bottom alien from each column
+    Object.values(columnAliens).forEach((columnGroup) => {
+      if (columnGroup.length > 0) {
+        const bottomAlien = columnGroup.reduce((bottom, current) =>
+          current.y > bottom.y ? current : bottom
+        );
+        bottomRowAliens.push(bottomAlien);
+      }
+    });
+
+    return bottomRowAliens;
+  }
+
+  private createAlienBullet(x: number, y: number): void {
+    const bullet = this.alienBullets.get(x, y, 'bullet') as Bullet;
+    if (bullet) {
+      bullet.setTint(0xff0000); // Red tint for alien bullets
+      bullet.fire(200); // Positive velocity (downward)
+    }
+  }
+
   private toggleCalculatingMode(): void {
     this.isCalculatingMode = !this.isCalculatingMode;
   }
@@ -281,6 +353,9 @@ export class GameScene extends Phaser.Scene {
     // Bonus for completing wave
     this.score += this.wave * 100;
     this.firepower = Math.min(100, this.firepower + 20);
+
+    // Reset alien shooting timer
+    this.lastAlienShootTime = this.time.now;
   }
 
   private gameOver(): void {
