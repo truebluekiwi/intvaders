@@ -453,21 +453,21 @@ export class GameScene extends Phaser.Scene {
     // Enhanced Alien sprites with mathematical styling
     for (let i = 1; i <= 9; i++) {
       graphics.clear();
-      
+
       // Color gradient based on number value
-      const baseColor = 0xff0000 + (i * 0x002200);
+      const baseColor = 0xff0000 + i * 0x002200;
       const accentColor = baseColor + 0x004400;
-      
+
       // Main alien body
       graphics.fillStyle(baseColor);
       graphics.fillRoundedRect(2, 2, 32, 20, 4);
-      
+
       // Alien details
       graphics.fillStyle(accentColor);
       graphics.fillCircle(10, 8, 3); // Left eye
       graphics.fillCircle(26, 8, 3); // Right eye
       graphics.fillRect(8, 16, 20, 2); // Mouth
-      
+
       // Antennae
       graphics.lineStyle(2, 0xffffff);
       graphics.beginPath();
@@ -476,7 +476,7 @@ export class GameScene extends Phaser.Scene {
       graphics.moveTo(26, 2);
       graphics.lineTo(28, -2);
       graphics.strokePath();
-      
+
       graphics.generateTexture(`alien${i}`, 36, 24);
     }
 
@@ -499,12 +499,14 @@ export class GameScene extends Phaser.Scene {
   private playSound(soundKey: string): void {
     try {
       // Create Web Audio API sounds on demand
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      
+      const audioContext = new (window.AudioContext ||
+        (window as typeof window & { webkitAudioContext: typeof AudioContext })
+          .webkitAudioContext)();
+
       if (audioContext.state === 'suspended') {
         audioContext.resume();
       }
-      
+
       switch (soundKey) {
         case 'shootSound':
           this.createShootSound(audioContext);
@@ -524,16 +526,22 @@ export class GameScene extends Phaser.Scene {
   private createShootSound(audioContext: AudioContext): void {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
-    
+    oscillator.frequency.exponentialRampToValueAtTime(
+      200,
+      audioContext.currentTime + 0.1
+    );
+
     gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-    
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.1
+    );
+
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.1);
   }
@@ -541,16 +549,22 @@ export class GameScene extends Phaser.Scene {
   private createHitSound(audioContext: AudioContext): void {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    
+
     oscillator.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.15);
-    
+    oscillator.frequency.exponentialRampToValueAtTime(
+      100,
+      audioContext.currentTime + 0.15
+    );
+
     gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
-    
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.15
+    );
+
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.15);
   }
@@ -559,22 +573,31 @@ export class GameScene extends Phaser.Scene {
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
     const filter = audioContext.createBiquadFilter();
-    
+
     oscillator.connect(filter);
     filter.connect(gainNode);
     gainNode.connect(audioContext.destination);
-    
+
     oscillator.type = 'sawtooth';
     oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.3);
-    
+    oscillator.frequency.exponentialRampToValueAtTime(
+      50,
+      audioContext.currentTime + 0.3
+    );
+
     filter.type = 'lowpass';
     filter.frequency.setValueAtTime(2000, audioContext.currentTime);
-    filter.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
-    
+    filter.frequency.exponentialRampToValueAtTime(
+      100,
+      audioContext.currentTime + 0.3
+    );
+
     gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-    
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioContext.currentTime + 0.3
+    );
+
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.3);
   }
