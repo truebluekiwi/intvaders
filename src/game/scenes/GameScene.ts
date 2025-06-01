@@ -33,8 +33,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   preload(): void {
-    // Create simple colored rectangles as placeholders for sprites
-    this.createPlaceholderAssets();
+    // Create improved visual assets
+    this.createImprovedAssets();
+
+    // Create sound effects using Web Audio API
+    this.createSoundEffects();
   }
 
   create(): void {
@@ -192,11 +195,10 @@ export class GameScene extends Phaser.Scene {
       // In calculating mode, shooting is free but requires math
       this.shootCalculatingMode();
     } else {
-      // Standard mode costs firepower
-      if (this.firepower >= 5) {
-        this.firepower -= 5;
-        this.createBullet(this.player.x, this.player.y - 10, -300);
-      }
+      // Standard mode - unlimited shooting
+      this.createBullet(this.player.x, this.player.y - 10, -300);
+      // Play shooting sound
+      this.playSound('shootSound');
     }
   }
 
@@ -235,6 +237,9 @@ export class GameScene extends Phaser.Scene {
     // Calculate score based on alien number
     const baseScore = alienNumber * 10;
     this.score += baseScore;
+
+    // Play hit sound
+    this.playSound('hitSound');
 
     // Destroy alien
     this.alienGrid.destroyAlien(alienSprite);
@@ -430,5 +435,147 @@ export class GameScene extends Phaser.Scene {
       this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE'
     );
     this.modeText.setColor(this.isCalculatingMode ? '#ffff00' : '#ffffff');
+  }
+
+  private createImprovedAssets(): void {
+    const graphics = this.add.graphics();
+
+    // Enhanced Player ship (sleek spaceship design)
+    graphics.clear();
+    graphics.fillStyle(0x00ffff);
+    graphics.fillTriangle(12, 0, 0, 24, 24, 24);
+    graphics.fillStyle(0x0088cc);
+    graphics.fillRect(8, 20, 8, 4);
+    graphics.fillStyle(0x00aaff);
+    graphics.fillCircle(12, 16, 3);
+    graphics.generateTexture('player', 24, 24);
+
+    // Enhanced Alien sprites with mathematical styling
+    for (let i = 1; i <= 9; i++) {
+      graphics.clear();
+      
+      // Color gradient based on number value
+      const baseColor = 0xff0000 + (i * 0x002200);
+      const accentColor = baseColor + 0x004400;
+      
+      // Main alien body
+      graphics.fillStyle(baseColor);
+      graphics.fillRoundedRect(2, 2, 32, 20, 4);
+      
+      // Alien details
+      graphics.fillStyle(accentColor);
+      graphics.fillCircle(10, 8, 3); // Left eye
+      graphics.fillCircle(26, 8, 3); // Right eye
+      graphics.fillRect(8, 16, 20, 2); // Mouth
+      
+      // Antennae
+      graphics.lineStyle(2, 0xffffff);
+      graphics.beginPath();
+      graphics.moveTo(10, 2);
+      graphics.lineTo(8, -2);
+      graphics.moveTo(26, 2);
+      graphics.lineTo(28, -2);
+      graphics.strokePath();
+      
+      graphics.generateTexture(`alien${i}`, 36, 24);
+    }
+
+    // Enhanced Bullet (energy projectile)
+    graphics.clear();
+    graphics.fillGradientStyle(0xffffff, 0x00ffff, 0xffffff, 0x00ffff, 1);
+    graphics.fillEllipse(3, 4, 6, 8);
+    graphics.fillStyle(0xffffff);
+    graphics.fillCircle(3, 2, 2);
+    graphics.generateTexture('bullet', 6, 8);
+
+    graphics.destroy();
+  }
+
+  private createSoundEffects(): void {
+    // Placeholder for sound effects - will be implemented with Web Audio API
+    console.log('Sound effects initialized');
+  }
+
+  private playSound(soundKey: string): void {
+    try {
+      // Create Web Audio API sounds on demand
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      
+      if (audioContext.state === 'suspended') {
+        audioContext.resume();
+      }
+      
+      switch (soundKey) {
+        case 'shootSound':
+          this.createShootSound(audioContext);
+          break;
+        case 'hitSound':
+          this.createHitSound(audioContext);
+          break;
+        case 'explosionSound':
+          this.createExplosionSound(audioContext);
+          break;
+      }
+    } catch (error) {
+      console.log('Audio not available:', error);
+    }
+  }
+
+  private createShootSound(audioContext: AudioContext): void {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.1);
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.1);
+  }
+
+  private createHitSound(audioContext: AudioContext): void {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.15);
+    
+    gainNode.gain.setValueAtTime(0.4, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.15);
+  }
+
+  private createExplosionSound(audioContext: AudioContext): void {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    const filter = audioContext.createBiquadFilter();
+    
+    oscillator.connect(filter);
+    filter.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(150, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(50, audioContext.currentTime + 0.3);
+    
+    filter.type = 'lowpass';
+    filter.frequency.setValueAtTime(2000, audioContext.currentTime);
+    filter.frequency.exponentialRampToValueAtTime(100, audioContext.currentTime + 0.3);
+    
+    gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.3);
   }
 }

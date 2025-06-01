@@ -8,6 +8,7 @@
 | v1.4    | 2025-05-26 | Refined structure, removed duplication, naming consistency         |
 | v1.5    | 2025-05-26 | Added phase deliverables, gameplay examples, updated architecture  |
 | v1.6    | 2025-05-26 | Added staged development strategy prioritizing basic functionality |
+| v1.7    | 2025-06-01 | Updated: Unlimited shooting, enhanced visuals, sound effects added |
 
 ---
 
