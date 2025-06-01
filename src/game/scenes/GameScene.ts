@@ -93,6 +93,9 @@ export class GameScene extends Phaser.Scene {
     this.player.update();
     this.alienGrid.update();
 
+    // Handle UFO collision detection
+    this.checkUfoCollisions();
+
     // Handle alien shooting
     this.handleAlienShooting();
 
@@ -231,18 +234,25 @@ export class GameScene extends Phaser.Scene {
 
     bulletSprite.destroy();
 
-    // Get alien number from stored data
-    const alienNumber = alienSprite.getData('number') || 1;
-
-    // Calculate score based on alien number
-    const baseScore = alienNumber * 10;
-    this.score += baseScore;
-
     // Play hit sound
     this.playSound('hitSound');
 
-    // Destroy alien
+    // Destroy alien and get score using new scoring system
+    // Pass calculating mode flag for bonus scoring
+    const scoreEarned = this.alienGrid.getAlienScore(
+      alienSprite,
+      this.isCalculatingMode
+    );
     this.alienGrid.destroyAlien(alienSprite);
+    this.score += scoreEarned;
+
+    // Bonus armor for calculating mode kills
+    if (this.isCalculatingMode) {
+      const alienData = alienSprite.getData('alienData');
+      if (alienData) {
+        this.armor += alienData.number; // Add armor equal to alien number
+      }
+    }
 
     // Add visual effect
     this.createExplosion(alienSprite.x, alienSprite.y);
@@ -268,6 +278,48 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  private checkUfoCollisions(): void {
+    const ufo = this.alienGrid.getUfo();
+    if (!ufo || !ufo.active) return;
+
+    // Check collision between bullets and UFO
+    this.bullets.children.entries.forEach((bullet) => {
+      const bulletSprite = bullet as Bullet;
+      if (!bulletSprite.active) return;
+
+      // Simple collision detection
+      const distance = Phaser.Math.Distance.Between(
+        bulletSprite.x,
+        bulletSprite.y,
+        ufo.x,
+        ufo.y
+      );
+
+      if (distance < 20) {
+        // UFO hit!
+        bulletSprite.destroy();
+
+        // Play hit sound
+        this.playSound('hitSound');
+        // Get UFO score and destroy it
+        const scoreEarned = this.alienGrid.getAlienScore(
+          ufo,
+          this.isCalculatingMode
+        );
+        this.alienGrid.destroyAlien(ufo);
+        this.score += scoreEarned;
+
+        // Special UFO bonus armor
+        if (this.isCalculatingMode) {
+          this.armor += 50; // UFO gives big armor bonus
+        }
+
+        // Create special explosion for UFO
+        this.createUfoExplosion(ufo.x, ufo.y);
+      }
+    });
+  }
+
   private createExplosion(x: number, y: number): void {
     // Simple explosion effect
     const explosion = this.add.circle(x, y, 20, 0xffff00, 0.8);
@@ -279,6 +331,39 @@ export class GameScene extends Phaser.Scene {
       duration: 200,
       onComplete: () => explosion.destroy(),
     });
+  }
+
+  private createUfoExplosion(x: number, y: number): void {
+    // Special UFO explosion effect
+    const explosion = this.add.circle(x, y, 30, 0xffff00, 1.0);
+    this.tweens.add({
+      targets: explosion,
+      scaleX: 3,
+      scaleY: 3,
+      alpha: 0,
+      duration: 400,
+      onComplete: () => explosion.destroy(),
+    });
+
+    // Add sparkle effects
+    for (let i = 0; i < 8; i++) {
+      const sparkle = this.add.circle(
+        x + Phaser.Math.Between(-20, 20),
+        y + Phaser.Math.Between(-20, 20),
+        3,
+        0xffffff,
+        0.8
+      );
+      this.tweens.add({
+        targets: sparkle,
+        scaleX: 0,
+        scaleY: 0,
+        alpha: 0,
+        duration: 300,
+        delay: i * 50,
+        onComplete: () => sparkle.destroy(),
+      });
+    }
   }
 
   private handleAlienShooting(): void {
@@ -312,7 +397,7 @@ export class GameScene extends Phaser.Scene {
 
     // Group aliens by column (x position)
     aliens.forEach((alien) => {
-      const column = Math.round(alien.x / 50); // Assuming 50px spacing
+      const column = Math.round(alien.x / 55); // Updated for 15% larger spacing (55px)
       if (!columnAliens[column]) {
         columnAliens[column] = [];
       }
@@ -450,35 +535,11 @@ export class GameScene extends Phaser.Scene {
     graphics.fillCircle(12, 16, 3);
     graphics.generateTexture('player', 24, 24);
 
-    // Enhanced Alien sprites with mathematical styling
-    for (let i = 1; i <= 9; i++) {
-      graphics.clear();
-
-      // Color gradient based on number value
-      const baseColor = 0xff0000 + i * 0x002200;
-      const accentColor = baseColor + 0x004400;
-
-      // Main alien body
-      graphics.fillStyle(baseColor);
-      graphics.fillRoundedRect(2, 2, 32, 20, 4);
-
-      // Alien details
-      graphics.fillStyle(accentColor);
-      graphics.fillCircle(10, 8, 3); // Left eye
-      graphics.fillCircle(26, 8, 3); // Right eye
-      graphics.fillRect(8, 16, 20, 2); // Mouth
-
-      // Antennae
-      graphics.lineStyle(2, 0xffffff);
-      graphics.beginPath();
-      graphics.moveTo(10, 2);
-      graphics.lineTo(8, -2);
-      graphics.moveTo(26, 2);
-      graphics.lineTo(28, -2);
-      graphics.strokePath();
-
-      graphics.generateTexture(`alien${i}`, 36, 24);
-    }
+    // Create authentic 1978 Space Invaders alien types
+    this.createSquidAlien(graphics);
+    this.createCrabAlien(graphics);
+    this.createOctopusAlien(graphics);
+    this.createUfoAlien(graphics);
 
     // Enhanced Bullet (energy projectile)
     graphics.clear();
@@ -489,6 +550,173 @@ export class GameScene extends Phaser.Scene {
     graphics.generateTexture('bullet', 6, 8);
 
     graphics.destroy();
+  }
+
+  private createSquidAlien(graphics: Phaser.GameObjects.Graphics): void {
+    // Squid alien (10 points) - Bottom rows, simplest design
+    graphics.clear();
+    graphics.fillStyle(0x00ff00); // Classic green
+
+    // Main body (rectangular with slight curve)
+    graphics.fillRect(4, 6, 24, 12);
+
+    // Eyes
+    graphics.fillStyle(0x000000);
+    graphics.fillRect(8, 8, 3, 3);
+    graphics.fillRect(21, 8, 3, 3);
+
+    // Tentacles (simple vertical lines)
+    graphics.fillStyle(0x00ff00);
+    graphics.fillRect(6, 18, 2, 6);
+    graphics.fillRect(12, 18, 2, 6);
+    graphics.fillRect(18, 18, 2, 6);
+    graphics.fillRect(24, 18, 2, 6);
+
+    // Mathematical circuit pattern overlay
+    graphics.lineStyle(1, 0x00aa00, 0.7);
+    graphics.strokeRect(6, 8, 20, 8);
+
+    graphics.generateTexture('alien_squid', 37, 28);
+  }
+
+  private createCrabAlien(graphics: Phaser.GameObjects.Graphics): void {
+    // Crab alien (20 points) - Middle rows, moderate complexity
+    graphics.clear();
+    graphics.fillStyle(0xffaa00); // Orange
+
+    // Main body (wider, more complex)
+    graphics.fillRect(2, 4, 28, 14);
+
+    // Eyes (larger, more prominent)
+    graphics.fillStyle(0x000000);
+    graphics.fillRect(6, 6, 4, 4);
+    graphics.fillRect(22, 6, 4, 4);
+
+    // Claws/arms extending outward
+    graphics.fillStyle(0xffaa00);
+    graphics.fillRect(0, 8, 4, 6);
+    graphics.fillRect(28, 8, 4, 6);
+
+    // Legs (more complex pattern)
+    graphics.fillRect(4, 18, 2, 4);
+    graphics.fillRect(8, 18, 2, 6);
+    graphics.fillRect(12, 18, 2, 4);
+    graphics.fillRect(16, 18, 2, 4);
+    graphics.fillRect(20, 18, 2, 6);
+    graphics.fillRect(26, 18, 2, 4);
+
+    // Mathematical pattern (geometric shapes)
+    graphics.lineStyle(1, 0xcc7700, 0.8);
+    graphics.strokeRect(4, 6, 24, 10);
+    graphics.beginPath();
+    graphics.moveTo(8, 8);
+    graphics.lineTo(24, 8);
+    graphics.moveTo(8, 14);
+    graphics.lineTo(24, 14);
+    graphics.strokePath();
+
+    graphics.generateTexture('alien_crab', 37, 28);
+  }
+
+  private createOctopusAlien(graphics: Phaser.GameObjects.Graphics): void {
+    // Octopus alien (30 points) - Top rows, most complex design
+    graphics.clear();
+    graphics.fillStyle(0xff0066); // Pink/magenta
+
+    // Main body (rounded, most sophisticated)
+    graphics.fillRoundedRect(2, 2, 28, 16, 4);
+
+    // Large prominent eyes
+    graphics.fillStyle(0x000000);
+    graphics.fillRect(5, 5, 5, 5);
+    graphics.fillRect(22, 5, 5, 5);
+
+    // Inner eye detail
+    graphics.fillStyle(0xffffff);
+    graphics.fillRect(6, 6, 2, 2);
+    graphics.fillRect(24, 6, 2, 2);
+
+    // Complex tentacle pattern
+    graphics.fillStyle(0xff0066);
+    graphics.fillRect(2, 18, 2, 6);
+    graphics.fillRect(6, 18, 2, 4);
+    graphics.fillRect(10, 18, 2, 6);
+    graphics.fillRect(14, 18, 2, 4);
+    graphics.fillRect(18, 18, 2, 6);
+    graphics.fillRect(22, 18, 2, 4);
+    graphics.fillRect(26, 18, 2, 6);
+    graphics.fillRect(30, 18, 2, 4);
+
+    // Advanced mathematical circuit overlay
+    graphics.lineStyle(1, 0xcc0044, 0.9);
+    graphics.strokeRoundedRect(4, 4, 24, 12, 2);
+    graphics.beginPath();
+    graphics.moveTo(6, 8);
+    graphics.lineTo(26, 8);
+    graphics.moveTo(6, 12);
+    graphics.lineTo(26, 12);
+    graphics.moveTo(16, 6);
+    graphics.lineTo(16, 14);
+    graphics.strokePath();
+
+    // Mathematical symbols overlay
+    graphics.lineStyle(1, 0xffffff, 0.6);
+    graphics.beginPath();
+    graphics.moveTo(12, 10);
+    graphics.lineTo(14, 10); // Plus sign horizontal
+    graphics.moveTo(13, 9);
+    graphics.lineTo(13, 11); // Plus sign vertical
+    graphics.moveTo(18, 9);
+    graphics.lineTo(20, 11); // Multiplication X
+    graphics.moveTo(18, 11);
+    graphics.lineTo(20, 9); // Multiplication X
+    graphics.strokePath();
+
+    graphics.generateTexture('alien_octopus', 37, 28);
+  }
+
+  private createUfoAlien(graphics: Phaser.GameObjects.Graphics): void {
+    // UFO alien (50-300 points) - Bonus spaceship
+    graphics.clear();
+    graphics.fillStyle(0xffff00); // Bright yellow
+
+    // Main UFO body (classic flying saucer shape)
+    graphics.fillEllipse(16, 12, 30, 12);
+
+    // UFO dome
+    graphics.fillStyle(0xffaa00);
+    graphics.fillEllipse(16, 8, 20, 8);
+
+    // UFO lights/windows
+    graphics.fillStyle(0xffffff);
+    graphics.fillCircle(8, 12, 2);
+    graphics.fillCircle(16, 12, 2);
+    graphics.fillCircle(24, 12, 2);
+
+    // Mathematical circuit pattern (most advanced)
+    graphics.lineStyle(1, 0xccaa00, 1.0);
+    graphics.strokeEllipse(16, 12, 28, 10);
+    graphics.beginPath();
+    graphics.moveTo(4, 12);
+    graphics.lineTo(28, 12);
+    graphics.moveTo(16, 4);
+    graphics.lineTo(16, 20);
+    graphics.strokePath();
+
+    // Special mathematical symbols for UFO
+    graphics.lineStyle(1, 0x000000, 0.8);
+    graphics.beginPath();
+    // Equals sign
+    graphics.moveTo(10, 10);
+    graphics.lineTo(14, 10);
+    graphics.moveTo(10, 14);
+    graphics.lineTo(14, 14);
+    // Division symbol
+    graphics.moveTo(18, 10);
+    graphics.lineTo(22, 14);
+    graphics.strokePath();
+
+    graphics.generateTexture('alien_ufo', 37, 28);
   }
 
   private createSoundEffects(): void {
