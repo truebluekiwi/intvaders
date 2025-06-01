@@ -248,15 +248,9 @@ export class GameScene extends Phaser.Scene {
       | Phaser.Types.Physics.Arcade.GameObjectWithBody
       | Phaser.Physics.Arcade.Body
       | Phaser.Physics.Arcade.StaticBody
-      | Phaser.Tilemaps.Tile,
-    player:
-      | Phaser.Types.Physics.Arcade.GameObjectWithBody
-      | Phaser.Physics.Arcade.Body
-      | Phaser.Physics.Arcade.StaticBody
       | Phaser.Tilemaps.Tile
   ): void {
     const bulletSprite = bullet as Bullet;
-    const playerSprite = player as Player;
 
     bulletSprite.destroy();
 
@@ -264,8 +258,8 @@ export class GameScene extends Phaser.Scene {
       this.armor -= 10;
     } else {
       this.lives--;
-      playerSprite.takeDamage();
-      this.createExplosion(playerSprite.x, playerSprite.y);
+      this.player.takeDamage();
+      this.createExplosion(this.player.x, this.player.y);
     }
   }
 
