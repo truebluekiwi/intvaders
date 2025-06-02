@@ -43,6 +43,16 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.cameras.main;
 
+    // Reset all game state variables
+    this.score = 0;
+    this.wave = 1;
+    this.lives = 3;
+    this.firepower = 100;
+    this.armor = 0;
+    this.isCalculatingMode = false;
+    this.lastAlienShootTime = 0;
+    this.alienShootInterval = 2000;
+
     // Background
     this.add.rectangle(width / 2, height / 2, width, height, 0x0c0c0c);
     this.createStarfield();
@@ -267,14 +277,28 @@ export class GameScene extends Phaser.Scene {
   ): void {
     const bulletSprite = bullet as Bullet;
 
+    // Don't process hit if player is invincible
+    if (this.player.getIsInvincible()) {
+      return;
+    }
+
     bulletSprite.destroy();
 
     if (this.armor > 0) {
       this.armor -= 10;
+      this.player.takeDamage();
     } else {
       this.lives--;
-      this.player.takeDamage();
       this.createExplosion(this.player.x, this.player.y);
+
+      if (this.lives > 0) {
+        // Player has lives remaining - recreate player
+        this.recreatePlayer();
+        this.clearPlayerBullets();
+      } else {
+        // Game over
+        this.player.takeDamage();
+      }
     }
   }
 
@@ -429,9 +453,72 @@ export class GameScene extends Phaser.Scene {
     this.isCalculatingMode = !this.isCalculatingMode;
   }
 
+  private recreatePlayer(): void {
+    const { width, height } = this.cameras.main;
+
+    // Destroy the old player
+    if (this.player) {
+      this.player.destroy();
+    }
+
+    // Create a new player
+    this.player = new Player(this, width / 2, height - 50);
+
+    // Re-establish collision detection for the new player
+    this.setupCollisions();
+
+    // Clear any frozen UFO and reset UFO timer to allow new spawning
+    const ufo = this.alienGrid.getUfo();
+    if (ufo && ufo.active) {
+      // Destroy frozen UFO and its text
+      const numberText = ufo.getData('numberText') as Phaser.GameObjects.Text;
+      if (numberText) {
+        numberText.destroy();
+      }
+      ufo.destroy();
+      // Reset UFO reference in AlienGrid
+      this.alienGrid.clearUfo();
+    }
+
+    // Set brief invincibility
+    this.player.setInvincible(true);
+    this.time.delayedCall(2000, () => {
+      this.player.setInvincible(false);
+    });
+  }
+
+  private clearPlayerBullets(): void {
+    // Clear all active player bullets
+    this.bullets.children.entries.forEach((bullet) => {
+      if (bullet.active) {
+        bullet.destroy();
+      }
+    });
+  }
+
+  private clearAllBullets(): void {
+    // Clear all bullets (player and alien)
+    this.clearPlayerBullets();
+    this.alienBullets.children.entries.forEach((bullet) => {
+      if (bullet.active) {
+        bullet.destroy();
+      }
+    });
+  }
+
   private nextWave(): void {
     this.wave++;
+
+    // Clear all bullets before creating new wave
+    this.clearAllBullets();
+
+    // Create new alien grid
     this.alienGrid = new AlienGrid(this, this.wave);
+
+    // Re-establish collision detection for new alien grid
+    this.setupCollisions();
+
+    // Start alien movement
     this.alienGrid.startMovement();
 
     // Bonus for completing wave

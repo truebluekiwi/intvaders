@@ -374,6 +374,10 @@ export class AlienGrid {
     return this.ufo;
   }
 
+  clearUfo(): void {
+    this.ufo = null;
+  }
+
   getAlienByNumber(number: number): Phaser.Physics.Arcade.Sprite | null {
     let foundAlien: Phaser.Physics.Arcade.Sprite | null = null;
 

@@ -33,7 +33,12 @@ export class Bullet extends Phaser.Physics.Arcade.Sprite {
   destroy(): void {
     this.setActive(false);
     this.setVisible(false);
-    this.setVelocity(0, 0);
+    
+    // Only set velocity if physics body still exists
+    if (this.body) {
+      this.setVelocity(0, 0);
+    }
+    
     super.destroy();
   }
 }
