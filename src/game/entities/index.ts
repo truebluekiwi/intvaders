@@ -1,3 +1,4 @@
 export { Player } from './Player';
-export { AlienGrid } from './AlienGrid';
+export { AlienGrid, AlienType } from './AlienGrid';
 export { Bullet } from './Bullet';
+export { ExplosionManager } from './ExplosionManager';

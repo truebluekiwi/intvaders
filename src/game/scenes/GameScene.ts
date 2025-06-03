@@ -1,5 +1,5 @@
 import * as Phaser from 'phaser';
-import { Player, AlienGrid, Bullet } from '../entities';
+import { Player, AlienGrid, Bullet, ExplosionManager } from '../entities';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -9,6 +9,7 @@ export class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private spaceKey!: Phaser.Input.Keyboard.Key;
   private enterKey!: Phaser.Input.Keyboard.Key;
+  private explosionManager!: ExplosionManager;
 
   // Game state
   private score: number = 0;
@@ -81,6 +82,9 @@ export class GameScene extends Phaser.Scene {
 
     this.player = new Player(this, width / 2, height - 50);
     this.alienGrid = new AlienGrid(this, this.wave);
+
+    // Initialize explosion manager
+    this.explosionManager = new ExplosionManager(this);
 
     // Setup collisions
     this.setupCollisions();
@@ -264,8 +268,14 @@ export class GameScene extends Phaser.Scene {
       }
     }
 
-    // Add visual effect
-    this.createExplosion(alienSprite.x, alienSprite.y);
+    // Add enhanced visual effect using ExplosionManager
+    const alienData = alienSprite.getData('alienData');
+    this.explosionManager.createExplosion({
+      x: alienSprite.x,
+      y: alienSprite.y,
+      type: 'alien',
+      alienType: alienData?.type,
+    });
   }
 
   private alienBulletHitPlayer(
@@ -289,7 +299,12 @@ export class GameScene extends Phaser.Scene {
       this.player.takeDamage();
     } else {
       this.lives--;
-      this.createExplosion(this.player.x, this.player.y);
+      // Create enhanced player explosion using ExplosionManager
+      this.explosionManager.createExplosion({
+        x: this.player.x,
+        y: this.player.y,
+        type: 'player',
+      });
 
       if (this.lives > 0) {
         // Player has lives remaining - recreate player
@@ -338,56 +353,14 @@ export class GameScene extends Phaser.Scene {
           this.armor += 50; // UFO gives big armor bonus
         }
 
-        // Create special explosion for UFO
-        this.createUfoExplosion(ufo.x, ufo.y);
+        // Create special explosion for UFO using ExplosionManager
+        this.explosionManager.createExplosion({
+          x: ufo.x,
+          y: ufo.y,
+          type: 'ufo',
+        });
       }
     });
-  }
-
-  private createExplosion(x: number, y: number): void {
-    // Simple explosion effect
-    const explosion = this.add.circle(x, y, 20, 0xffff00, 0.8);
-    this.tweens.add({
-      targets: explosion,
-      scaleX: 2,
-      scaleY: 2,
-      alpha: 0,
-      duration: 200,
-      onComplete: () => explosion.destroy(),
-    });
-  }
-
-  private createUfoExplosion(x: number, y: number): void {
-    // Special UFO explosion effect
-    const explosion = this.add.circle(x, y, 30, 0xffff00, 1.0);
-    this.tweens.add({
-      targets: explosion,
-      scaleX: 3,
-      scaleY: 3,
-      alpha: 0,
-      duration: 400,
-      onComplete: () => explosion.destroy(),
-    });
-
-    // Add sparkle effects
-    for (let i = 0; i < 8; i++) {
-      const sparkle = this.add.circle(
-        x + Phaser.Math.Between(-20, 20),
-        y + Phaser.Math.Between(-20, 20),
-        3,
-        0xffffff,
-        0.8
-      );
-      this.tweens.add({
-        targets: sparkle,
-        scaleX: 0,
-        scaleY: 0,
-        alpha: 0,
-        duration: 300,
-        delay: i * 50,
-        onComplete: () => sparkle.destroy(),
-      });
-    }
   }
 
   private handleAlienShooting(): void {
@@ -530,6 +503,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   private gameOver(): void {
+    // Clean up explosion manager
+    if (this.explosionManager) {
+      this.explosionManager.destroy();
+    }
+
     this.scene.start('GameOverScene', {
       score: this.score,
       wave: this.wave,
