@@ -1,0 +1,25 @@
+# Cline Rules for IntVaders.com Project
+
+## Line Ending Rules
+- Always use Unix-style line endings (LF only, \n) for all text files
+- When creating or editing files, ensure no carriage return characters (\r) are included
+- If encountering CRLF line ending errors, use PowerShell command: `$content = Get-Content "filename" -Raw; $content = $content -replace "\`r\`n", "\`n"; Set-Content "filename" -Value $content -NoNewline`
+
+## File Creation Guidelines
+- All TypeScript (.ts, .tsx) files should use LF line endings
+- All JavaScript (.js, .jsx) files should use LF line endings
+- All JSON configuration files should use LF line endings
+- All Markdown (.md) files should use LF line endings
+
+## ESLint Compliance
+- Before completing any file editing task, ensure the file passes ESLint rules
+- Pay special attention to line ending format to avoid `Delete ␍` errors
+- Use consistent formatting that matches the project's ESLint configuration
+
+## Development Guidelines
+- Don't test at the end of a task. Instead ask the user to test and check, and report back and await an input
+- Don't create placeholder code unless planning to expand on it later
+- Code from A to Z rather than just small parts that don't fulfill the user's needs
+- Keep project files between 300-500 lines where possible
+- Don't duplicate code; build upon existing implementations
+- When running Terminal Commands assume the environment is Windows 11 using PowerShell

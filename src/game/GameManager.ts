@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { GameScene } from './scenes/GameScene';
 import { MenuScene } from './scenes/MenuScene';
 import { GameOverScene } from './scenes/GameOverScene';
+import { PauseScene } from './scenes/PauseScene';
 
 export class GameManager {
   private game: Phaser.Game | null = null;
@@ -25,7 +26,7 @@ export class GameManager {
           debug: false,
         },
       },
-      scene: [MenuScene, GameScene, GameOverScene],
+      scene: [MenuScene, GameScene, GameOverScene, PauseScene],
       scale: {
         mode: Phaser.Scale.FIT,
         autoCenter: Phaser.Scale.CENTER_BOTH,

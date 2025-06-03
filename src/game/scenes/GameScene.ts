@@ -9,6 +9,8 @@ export class GameScene extends Phaser.Scene {
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private spaceKey!: Phaser.Input.Keyboard.Key;
   private enterKey!: Phaser.Input.Keyboard.Key;
+  private pKey!: Phaser.Input.Keyboard.Key;
+  private escKey!: Phaser.Input.Keyboard.Key;
   private explosionManager!: ExplosionManager;
 
   // Game state
@@ -21,6 +23,12 @@ export class GameScene extends Phaser.Scene {
   private lastAlienShootTime: number = 0;
   private alienShootInterval: number = 2000; // milliseconds
 
+  // Pause system
+  private isPaused: boolean = false;
+  private maxPauseTime: number = 600000; // 10 minutes in milliseconds
+  private remainingPauseTime: number = 600000; // Start with full pause time
+  private pauseStartTime: number = 0;
+
   // UI elements
   private scoreText!: Phaser.GameObjects.Text;
   private waveText!: Phaser.GameObjects.Text;
@@ -28,6 +36,7 @@ export class GameScene extends Phaser.Scene {
   private firepowerText!: Phaser.GameObjects.Text;
   private armorText!: Phaser.GameObjects.Text;
   private modeText!: Phaser.GameObjects.Text;
+  private pauseTimeText!: Phaser.GameObjects.Text;
 
   constructor() {
     super({ key: 'GameScene' });
@@ -54,6 +63,11 @@ export class GameScene extends Phaser.Scene {
     this.lastAlienShootTime = 0;
     this.alienShootInterval = 2000;
 
+    // Reset pause system
+    this.isPaused = false;
+    this.remainingPauseTime = this.maxPauseTime;
+    this.pauseStartTime = 0;
+
     // Background
     this.add.rectangle(width / 2, height / 2, width, height, 0x0c0c0c);
     this.createStarfield();
@@ -66,6 +80,15 @@ export class GameScene extends Phaser.Scene {
     this.enterKey = this.input.keyboard!.addKey(
       Phaser.Input.Keyboard.KeyCodes.ENTER
     );
+    this.pKey = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.P);
+    this.escKey = this.input.keyboard!.addKey(
+      Phaser.Input.Keyboard.KeyCodes.ESC
+    );
+
+    // Ensure game canvas has focus for keyboard input
+    this.input.on('pointerdown', () => {
+      this.game.canvas.focus();
+    });
 
     // Create game entities
     this.bullets = this.physics.add.group({
@@ -100,8 +123,13 @@ export class GameScene extends Phaser.Scene {
   }
 
   update(): void {
-    // Handle input
+    // Handle input (always process pause input)
     this.handleInput();
+
+    // Skip game updates if paused
+    if (this.isPaused) {
+      return;
+    }
 
     // Update entities
     this.player.update();
@@ -189,6 +217,36 @@ export class GameScene extends Phaser.Scene {
   }
 
   private handleInput(): void {
+    // Debug: Log that handleInput is being called
+    if (this.time.now % 1000 < 16) { // Log once per second approximately
+      console.log('handleInput called, isPaused:', this.isPaused);
+    }
+
+    // Only handle pause input if not already paused (let PauseScene handle resume)
+    if (!this.isPaused) {
+      // Debug: Check if keys are being detected
+      if (this.pKey.isDown) {
+        console.log('P key is down');
+      }
+      if (this.escKey.isDown) {
+        console.log('ESC key is down');
+      }
+
+      if (
+        Phaser.Input.Keyboard.JustDown(this.pKey) ||
+        Phaser.Input.Keyboard.JustDown(this.escKey)
+      ) {
+        console.log('Pause key detected!');
+        this.pauseGame();
+        return;
+      }
+    }
+
+    // Skip other inputs if paused
+    if (this.isPaused) {
+      return;
+    }
+
     // Movement
     if (this.cursors.left.isDown) {
       this.player.moveLeft();
@@ -246,6 +304,11 @@ export class GameScene extends Phaser.Scene {
     const bulletSprite = bullet as Bullet;
     const alienSprite = alien as Phaser.Physics.Arcade.Sprite;
 
+    // Don't process hit if game is paused
+    if (this.isPaused) {
+      return;
+    }
+
     bulletSprite.destroy();
 
     // Play hit sound
@@ -286,6 +349,11 @@ export class GameScene extends Phaser.Scene {
       | Phaser.Tilemaps.Tile
   ): void {
     const bulletSprite = bullet as Bullet;
+
+    // Don't process hit if game is paused
+    if (this.isPaused) {
+      return;
+    }
 
     // Don't process hit if player is invincible
     if (this.player.getIsInvincible()) {
@@ -573,6 +641,19 @@ export class GameScene extends Phaser.Scene {
       }
     );
     this.modeText.setOrigin(1, 0);
+
+    // Pause time display
+    this.pauseTimeText = this.add.text(
+      this.cameras.main.width - padding,
+      padding + 25,
+      this.formatPauseTimeDisplay(),
+      {
+        fontSize: '14px',
+        color: this.getPauseTimeColor(),
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
+    this.pauseTimeText.setOrigin(1, 0);
   }
 
   private updateUI(): void {
@@ -585,6 +666,24 @@ export class GameScene extends Phaser.Scene {
       this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE'
     );
     this.modeText.setColor(this.isCalculatingMode ? '#ffff00' : '#ffffff');
+
+    // Update pause time display
+    this.pauseTimeText.setText(this.formatPauseTimeDisplay());
+    this.pauseTimeText.setColor(this.getPauseTimeColor());
+  }
+
+  private formatPauseTimeDisplay(): string {
+    const totalSeconds = Math.ceil(this.remainingPauseTime / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `Pause: ${minutes}:${seconds.toString().padStart(2, '0')} (P/ESC)`;
+  }
+
+  private getPauseTimeColor(): string {
+    if (this.remainingPauseTime <= 0) return '#ff0000'; // Red when exhausted
+    if (this.remainingPauseTime <= 60000) return '#ff4444'; // Red for last minute
+    if (this.remainingPauseTime <= 180000) return '#ffaa00'; // Orange for last 3 minutes
+    return '#00ff00'; // Green for plenty of time
   }
 
   private createImprovedAssets(): void {
@@ -782,6 +881,61 @@ export class GameScene extends Phaser.Scene {
     graphics.strokePath();
 
     graphics.generateTexture('alien_ufo', 37, 28);
+  }
+
+  private pauseGame(): void {
+    // Check if pause time is available
+    if (this.remainingPauseTime <= 0) {
+      console.log('Cannot pause - no time remaining');
+      return; // Cannot pause - no time remaining
+    }
+
+    console.log('Pausing game...');
+    this.isPaused = true;
+    this.pauseStartTime = this.time.now;
+
+    // Launch pause scene with remaining time
+    console.log('Launching PauseScene with remaining time:', this.remainingPauseTime);
+    this.scene.launch('PauseScene', { remainingTime: this.remainingPauseTime });
+
+    // Set up event listeners for pause scene
+    this.events.on('pauseTimeUpdate', this.handlePauseTimeUpdate, this);
+    this.events.on('resumeGame', this.handleResumeFromPause, this);
+  }
+
+  private resumeGame(): void {
+    if (!this.isPaused) {
+      return;
+    }
+
+    // Calculate time spent paused
+    const pauseDuration = this.time.now - this.pauseStartTime;
+    this.remainingPauseTime = Math.max(
+      0,
+      this.remainingPauseTime - pauseDuration
+    );
+
+    this.isPaused = false;
+    this.pauseStartTime = 0;
+
+    // Adjust alien shooting timer to account for pause
+    this.lastAlienShootTime += pauseDuration;
+
+    // Stop pause scene
+    this.scene.stop('PauseScene');
+
+    // Clean up event listeners
+    this.events.off('pauseTimeUpdate', this.handlePauseTimeUpdate, this);
+    this.events.off('resumeGame', this.handleResumeFromPause, this);
+  }
+
+  private handlePauseTimeUpdate(remainingTime: number): void {
+    this.remainingPauseTime = remainingTime;
+  }
+
+  private handleResumeFromPause(remainingTime: number): void {
+    this.remainingPauseTime = remainingTime;
+    this.resumeGame();
   }
 
   private createSoundEffects(): void {
