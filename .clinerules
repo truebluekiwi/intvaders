@@ -12,9 +12,28 @@
 - All Markdown (.md) files should use LF line endings
 
 ## ESLint Compliance
-- Before completing any file editing task, ensure the file passes ESLint rules
+- **MANDATORY**: Before completing any file editing task, ensure the file passes ESLint rules
+- **MANDATORY**: After creating or modifying any code file, verify ESLint compliance
 - Pay special attention to line ending format to avoid `Delete ␍` errors
 - Use consistent formatting that matches the project's ESLint configuration
+- Follow these specific ESLint rules to prevent common errors:
+  - Keep lines under the maximum length limit (typically 80-100 characters)
+  - Break long function calls, object literals, and strings across multiple lines
+  - Use proper indentation (2 spaces for this project)
+  - Add blank lines between logical code blocks
+  - Ensure proper spacing around operators and keywords
+  - Use single quotes for strings unless double quotes are required
+  - Add trailing commas in multi-line arrays and objects
+  - Remove unused variables and imports
+  - Use semicolons consistently as per project configuration
+
+## Code Quality Standards
+- Write clean, readable code that follows TypeScript/JavaScript best practices
+- Use meaningful variable and function names
+- Add appropriate comments for complex logic
+- Ensure proper error handling where needed
+- Follow the existing code style and patterns in the project
+- Use TypeScript types properly and avoid `any` when possible
 
 ## Development Guidelines
 - Don't test at the end of a task. Instead ask the user to test and check, and report back and await an input
@@ -23,3 +42,12 @@
 - Keep project files between 300-500 lines where possible
 - Don't duplicate code; build upon existing implementations
 - When running Terminal Commands assume the environment is Windows 11 using PowerShell
+
+## Pre-Completion Checklist
+Before using attempt_completion, always verify:
+1. All ESLint errors have been resolved
+2. Code follows project formatting standards
+3. Line endings are correct (LF only)
+4. No syntax errors exist
+5. TypeScript types are properly defined
+6. Code is properly tested and functional

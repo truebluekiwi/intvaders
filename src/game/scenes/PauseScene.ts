@@ -20,10 +20,10 @@ export class PauseScene extends Phaser.Scene {
 
   create(): void {
     console.log('PauseScene create called');
-    
+
     // Reset the resuming flag
     this.isResuming = false;
-    
+
     const { width, height } = this.cameras.main;
 
     // Semi-transparent dark overlay
@@ -204,7 +204,7 @@ export class PauseScene extends Phaser.Scene {
     if (this.isResuming) {
       return;
     }
-    
+
     console.log('Resuming game...');
     this.isResuming = true;
 

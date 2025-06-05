@@ -218,7 +218,8 @@ export class GameScene extends Phaser.Scene {
 
   private handleInput(): void {
     // Debug: Log that handleInput is being called
-    if (this.time.now % 1000 < 16) { // Log once per second approximately
+    if (this.time.now % 1000 < 16) {
+      // Log once per second approximately
       console.log('handleInput called, isPaused:', this.isPaused);
     }
 
@@ -557,7 +558,9 @@ export class GameScene extends Phaser.Scene {
     const existingUfo = this.alienGrid.getUfo();
     if (existingUfo && existingUfo.active) {
       // Destroy UFO and its text
-      const numberText = existingUfo.getData('numberText') as Phaser.GameObjects.Text;
+      const numberText = existingUfo.getData(
+        'numberText'
+      ) as Phaser.GameObjects.Text;
       if (numberText) {
         numberText.destroy();
       }
@@ -907,7 +910,10 @@ export class GameScene extends Phaser.Scene {
     this.pauseStartTime = this.time.now;
 
     // Launch pause scene with remaining time
-    console.log('Launching PauseScene with remaining time:', this.remainingPauseTime);
+    console.log(
+      'Launching PauseScene with remaining time:',
+      this.remainingPauseTime
+    );
     this.scene.launch('PauseScene', { remainingTime: this.remainingPauseTime });
 
     // Set up event listeners for pause scene
