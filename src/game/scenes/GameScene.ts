@@ -553,6 +553,18 @@ export class GameScene extends Phaser.Scene {
     // Clear all bullets before creating new wave
     this.clearAllBullets();
 
+    // Clean up any existing UFO from the previous wave
+    const existingUfo = this.alienGrid.getUfo();
+    if (existingUfo && existingUfo.active) {
+      // Destroy UFO and its text
+      const numberText = existingUfo.getData('numberText') as Phaser.GameObjects.Text;
+      if (numberText) {
+        numberText.destroy();
+      }
+      existingUfo.destroy();
+      this.alienGrid.clearUfo();
+    }
+
     // Create new alien grid
     this.alienGrid = new AlienGrid(this, this.wave);
 
