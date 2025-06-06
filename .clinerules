@@ -50,4 +50,3 @@ Before using attempt_completion, always verify:
 3. Line endings are correct (LF only)
 4. No syntax errors exist
 5. TypeScript types are properly defined
-6. Code is properly tested and functional

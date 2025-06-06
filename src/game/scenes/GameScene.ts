@@ -1,5 +1,7 @@
 import * as Phaser from 'phaser';
 import { Player, AlienGrid, Bullet, ExplosionManager } from '../entities';
+import { WaveTransitionData } from './WaveTransitionScene';
+import { AlienType } from '../entities/AlienGrid';
 
 export class GameScene extends Phaser.Scene {
   private player!: Player;
@@ -22,6 +24,15 @@ export class GameScene extends Phaser.Scene {
   private isCalculatingMode: boolean = false;
   private lastAlienShootTime: number = 0;
   private alienShootInterval: number = 2000; // milliseconds
+
+  // Wave statistics tracking
+  private waveStartScore: number = 0;
+  private aliensDestroyedThisWave: {
+    squid: number;
+    crab: number;
+    octopus: number;
+    ufo: number;
+  } = { squid: 0, crab: 0, octopus: 0, ufo: 0 };
 
   // Pause system
   private isPaused: boolean = false;
@@ -120,6 +131,12 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize alien shooting timer
     this.lastAlienShootTime = this.time.now;
+
+    // Initialize wave statistics
+    this.initializeWaveStats();
+
+    // Set up event listener for wave transition
+    this.events.on('startNextWave', this.handleStartNextWave, this);
   }
 
   update(): void {
@@ -315,6 +332,12 @@ export class GameScene extends Phaser.Scene {
     // Play hit sound
     this.playSound('hitSound');
 
+    // Get alien data before destroying
+    const alienData = alienSprite.getData('alienData');
+
+    // Track alien destruction for statistics
+    this.trackAlienDestruction(alienData);
+
     // Destroy alien and get score using new scoring system
     // Pass calculating mode flag for bonus scoring
     const scoreEarned = this.alienGrid.getAlienScore(
@@ -326,20 +349,13 @@ export class GameScene extends Phaser.Scene {
 
     // Bonus armor for calculating mode kills
     if (this.isCalculatingMode) {
-      const alienData = alienSprite.getData('alienData');
       if (alienData) {
         this.armor += alienData.number; // Add armor equal to alien number
       }
     }
 
-    // Add enhanced visual effect using ExplosionManager
-    const alienData = alienSprite.getData('alienData');
-    this.explosionManager.createExplosion({
-      x: alienSprite.x,
-      y: alienSprite.y,
-      type: 'alien',
-      alienType: alienData?.type,
-    });
+    // Enhanced alien destruction effect with type-specific debris
+    this.createAlienDebris(alienSprite.x, alienSprite.y, alienData);
   }
 
   private alienBulletHitPlayer(
@@ -549,9 +565,28 @@ export class GameScene extends Phaser.Scene {
   }
 
   private nextWave(): void {
+    // Calculate wave statistics
+    const waveScore = this.score - this.waveStartScore;
+    const bonusScore = this.wave * 100;
+    const newFirepower = Math.min(100, this.firepower + 20);
+
+    // Prepare transition data
+    const transitionData: WaveTransitionData = {
+      completedWave: this.wave,
+      nextWave: this.wave + 1,
+      score: this.score + bonusScore,
+      waveScore,
+      bonusScore,
+      newFirepower,
+      aliensDestroyed: { ...this.aliensDestroyedThisWave },
+    };
+
+    // Apply bonuses
+    this.score += bonusScore;
+    this.firepower = newFirepower;
     this.wave++;
 
-    // Clear all bullets before creating new wave
+    // Clear all bullets before transition
     this.clearAllBullets();
 
     // Clean up any existing UFO from the previous wave
@@ -568,21 +603,9 @@ export class GameScene extends Phaser.Scene {
       this.alienGrid.clearUfo();
     }
 
-    // Create new alien grid
-    this.alienGrid = new AlienGrid(this, this.wave);
-
-    // Re-establish collision detection for new alien grid
-    this.setupCollisions();
-
-    // Start alien movement
-    this.alienGrid.startMovement();
-
-    // Bonus for completing wave
-    this.score += this.wave * 100;
-    this.firepower = Math.min(100, this.firepower + 20);
-
-    // Reset alien shooting timer
-    this.lastAlienShootTime = this.time.now;
+    // Pause the game scene and launch transition scene
+    this.scene.pause('GameScene');
+    this.scene.launch('WaveTransitionScene', transitionData);
   }
 
   private gameOver(): void {
@@ -1065,5 +1088,249 @@ export class GameScene extends Phaser.Scene {
 
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.3);
+  }
+
+  private initializeWaveStats(): void {
+    this.waveStartScore = this.score;
+    this.aliensDestroyedThisWave = { squid: 0, crab: 0, octopus: 0, ufo: 0 };
+  }
+
+  private trackAlienDestruction(
+    alienData: { type: AlienType; number: number } | null
+  ): void {
+    if (alienData) {
+      switch (alienData.type) {
+        case AlienType.SQUID:
+          this.aliensDestroyedThisWave.squid++;
+          break;
+        case AlienType.CRAB:
+          this.aliensDestroyedThisWave.crab++;
+          break;
+        case AlienType.OCTOPUS:
+          this.aliensDestroyedThisWave.octopus++;
+          break;
+        case AlienType.UFO:
+          this.aliensDestroyedThisWave.ufo++;
+          break;
+      }
+    }
+  }
+
+  private createAlienDebris(
+    x: number,
+    y: number,
+    alienData: { type: AlienType; number: number } | null
+  ): void {
+    // Create initial flash effect
+    const flash = this.add.circle(x, y, 15, 0xffffff, 0.8);
+    this.tweens.add({
+      targets: flash,
+      alpha: 0,
+      scaleX: 2,
+      scaleY: 2,
+      duration: 200,
+      onComplete: () => flash.destroy(),
+    });
+
+    if (!alienData) return;
+
+    // Create type-specific debris
+    switch (alienData.type) {
+      case AlienType.SQUID:
+        this.createSquidDebris(x, y);
+        break;
+      case AlienType.CRAB:
+        this.createCrabDebris(x, y);
+        break;
+      case AlienType.OCTOPUS:
+        this.createOctopusDebris(x, y);
+        break;
+      case AlienType.UFO:
+        this.createUfoDebris(x, y);
+        break;
+    }
+  }
+
+  private createSquidDebris(x: number, y: number): void {
+    // Green tentacle pieces for squid
+    const debrisCount = 4;
+    const debrisColor = 0x00ff00;
+
+    for (let i = 0; i < debrisCount; i++) {
+      // Create small rectangular debris pieces (tentacle fragments)
+      const debris = this.add.rectangle(x, y, 3, 8, debrisColor);
+      const angle = (i / debrisCount) * Math.PI * 2;
+      const speed = Phaser.Math.Between(50, 120);
+
+      // Add physics to debris
+      this.physics.add.existing(debris);
+      const debrisBody = debris.body as Phaser.Physics.Arcade.Body;
+      debrisBody.setVelocity(
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed - 30
+      );
+      debrisBody.setGravityY(200);
+
+      // Rotate debris as it flies
+      this.tweens.add({
+        targets: debris,
+        rotation: Math.PI * 4,
+        alpha: 0,
+        duration: 1000,
+        onComplete: () => debris.destroy(),
+      });
+    }
+  }
+
+  private createCrabDebris(x: number, y: number): void {
+    // Orange claw and leg pieces for crab
+    const debrisCount = 6;
+    const debrisColor = 0xffaa00;
+
+    for (let i = 0; i < debrisCount; i++) {
+      // Create varied debris shapes (claws and legs)
+      const isLeg = i % 2 === 0;
+      const debris = isLeg
+        ? this.add.rectangle(x, y, 2, 6, debrisColor) // Leg pieces
+        : this.add.rectangle(x, y, 6, 3, debrisColor); // Claw pieces
+
+      const angle = (i / debrisCount) * Math.PI * 2;
+      const speed = Phaser.Math.Between(60, 140);
+
+      // Add physics to debris
+      this.physics.add.existing(debris);
+      const debrisBody = debris.body as Phaser.Physics.Arcade.Body;
+      debrisBody.setVelocity(
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed - 20
+      );
+      debrisBody.setGravityY(180);
+
+      // Tumble effect
+      this.tweens.add({
+        targets: debris,
+        rotation: Math.PI * 3,
+        alpha: 0,
+        scaleX: 0.5,
+        scaleY: 0.5,
+        duration: 1200,
+        onComplete: () => debris.destroy(),
+      });
+    }
+  }
+
+  private createOctopusDebris(x: number, y: number): void {
+    // Pink/magenta tentacle and eye pieces for octopus
+    const debrisCount = 8;
+    const debrisColor = 0xff0066;
+    const eyeColor = 0xffffff;
+
+    for (let i = 0; i < debrisCount; i++) {
+      let debris;
+      if (i < 2) {
+        // Create eye debris (white circles)
+        debris = this.add.circle(x, y, 3, eyeColor);
+      } else {
+        // Create tentacle pieces (longer rectangles)
+        debris = this.add.rectangle(x, y, 2, 10, debrisColor);
+      }
+
+      const angle = (i / debrisCount) * Math.PI * 2;
+      const speed = Phaser.Math.Between(70, 160);
+
+      // Add physics to debris
+      this.physics.add.existing(debris);
+      const debrisBody = debris.body as Phaser.Physics.Arcade.Body;
+      debrisBody.setVelocity(
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed - 40
+      );
+      debrisBody.setGravityY(220);
+
+      // Complex rotation and scaling
+      this.tweens.add({
+        targets: debris,
+        rotation: Math.PI * 5,
+        alpha: 0,
+        scaleX: i < 2 ? 0.2 : 0.3, // Eyes shrink more
+        scaleY: i < 2 ? 0.2 : 0.3,
+        duration: 1400,
+        ease: 'Power2',
+        onComplete: () => debris.destroy(),
+      });
+    }
+  }
+
+  private createUfoDebris(x: number, y: number): void {
+    // Yellow metallic pieces and light fragments for UFO
+    const debrisCount = 10;
+    const metalColor = 0xffff00;
+    const lightColor = 0xffffff;
+
+    for (let i = 0; i < debrisCount; i++) {
+      let debris;
+      if (i < 3) {
+        // Create light debris (white circles)
+        debris = this.add.circle(x, y, 2, lightColor);
+      } else if (i < 6) {
+        // Create dome pieces (curved fragments)
+        debris = this.add.ellipse(x, y, 8, 4, 0xffaa00);
+      } else {
+        // Create hull pieces (rectangular fragments)
+        debris = this.add.rectangle(x, y, 6, 2, metalColor);
+      }
+
+      const angle = (i / debrisCount) * Math.PI * 2;
+      const speed = Phaser.Math.Between(80, 200);
+
+      // Add physics to debris
+      this.physics.add.existing(debris);
+      const debrisBody = debris.body as Phaser.Physics.Arcade.Body;
+      debrisBody.setVelocity(
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed - 50
+      );
+      debrisBody.setGravityY(150); // UFO debris floats more
+
+      // Sparkling effect for UFO debris
+      this.tweens.add({
+        targets: debris,
+        rotation: Math.PI * 6,
+        alpha: 0,
+        scaleX: 0.1,
+        scaleY: 0.1,
+        duration: 1800,
+        ease: 'Power3',
+        onComplete: () => debris.destroy(),
+      });
+
+      // Add extra sparkle effect for lights
+      if (i < 3) {
+        this.tweens.add({
+          targets: debris,
+          alpha: { from: 1, to: 0.3 },
+          duration: 100,
+          yoyo: true,
+          repeat: 8,
+        });
+      }
+    }
+  }
+
+  private handleStartNextWave(data: { wave: number }): void {
+    // Create new alien grid for the next wave
+    this.alienGrid = new AlienGrid(this, data.wave);
+
+    // Re-establish collision detection for new alien grid
+    this.setupCollisions();
+
+    // Start alien movement
+    this.alienGrid.startMovement();
+
+    // Reset alien shooting timer
+    this.lastAlienShootTime = this.time.now;
+
+    // Initialize wave statistics for the new wave
+    this.initializeWaveStats();
   }
 }
