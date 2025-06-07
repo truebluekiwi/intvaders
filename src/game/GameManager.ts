@@ -2,6 +2,7 @@ import * as Phaser from 'phaser';
 import { GameScene } from './scenes/GameScene';
 import { MenuScene } from './scenes/MenuScene';
 import { GameOverScene } from './scenes/GameOverScene';
+import { GameEndSequence } from './scenes/GameEndSequence';
 import { PauseScene } from './scenes/PauseScene';
 import { WaveTransitionScene } from './scenes/WaveTransitionScene';
 
@@ -30,6 +31,7 @@ export class GameManager {
       scene: [
         MenuScene,
         GameScene,
+        GameEndSequence,
         GameOverScene,
         PauseScene,
         WaveTransitionScene,

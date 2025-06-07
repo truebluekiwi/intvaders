@@ -614,9 +614,28 @@ export class GameScene extends Phaser.Scene {
       this.explosionManager.destroy();
     }
 
-    this.scene.start('GameOverScene', {
+    // Determine end reason
+    const endReason = this.lives <= 0 ? 'player_death' : 'alien_invasion';
+
+    // Calculate final statistics
+    const finalStats = {
+      aliensDestroyed:
+        this.aliensDestroyedThisWave.squid +
+        this.aliensDestroyedThisWave.crab +
+        this.aliensDestroyedThisWave.octopus +
+        this.aliensDestroyedThisWave.ufo,
+      shotsfired: 0, // TODO: Track this in future update
+      accuracy: 0, // TODO: Calculate this in future update
+      timeAlive: this.time.now, // Approximate time alive
+    };
+
+    // Start the dramatic game end sequence
+    this.scene.start('GameEndSequence', {
       score: this.score,
       wave: this.wave,
+      lives: this.lives,
+      endReason: endReason,
+      finalStats: finalStats,
     });
   }
 
