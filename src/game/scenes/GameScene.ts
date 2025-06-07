@@ -610,7 +610,8 @@ export class GameScene extends Phaser.Scene {
       this.alienGrid.clearUfo();
     }
 
-    // Player will get invincibility from the death sequence materialization effect
+    // Start invincibility with visible halo effect
+    this.player.startInvincibilityWithHalo();
   }
 
   private clearPlayerBullets(): void {
