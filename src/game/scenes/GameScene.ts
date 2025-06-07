@@ -1,5 +1,11 @@
 import * as Phaser from 'phaser';
-import { Player, AlienGrid, Bullet, ExplosionManager } from '../entities';
+import {
+  Player,
+  AlienGrid,
+  Bullet,
+  ExplosionManager,
+  PlayerDeathSequence,
+} from '../entities';
 import { WaveTransitionData } from './WaveTransitionScene';
 import { AlienType } from '../entities/AlienGrid';
 
@@ -14,6 +20,7 @@ export class GameScene extends Phaser.Scene {
   private pKey!: Phaser.Input.Keyboard.Key;
   private escKey!: Phaser.Input.Keyboard.Key;
   private explosionManager!: ExplosionManager;
+  private playerDeathSequence!: PlayerDeathSequence;
 
   // Game state
   private score: number = 0;
@@ -119,6 +126,20 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize explosion manager
     this.explosionManager = new ExplosionManager(this);
+
+    // Initialize player death sequence
+    this.playerDeathSequence = new PlayerDeathSequence({
+      player: this.player,
+      explosionManager: this.explosionManager,
+      scene: this,
+      onComplete: () => {
+        // Death sequence completed
+      },
+      onRespawn: () => {
+        // Recreate player during respawn phase
+        this.recreatePlayerForDeathSequence();
+      },
+    });
 
     // Setup collisions
     this.setupCollisions();
@@ -377,6 +398,11 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    // Don't process hit if death sequence is already active
+    if (this.playerDeathSequence.isSequenceActive()) {
+      return;
+    }
+
     bulletSprite.destroy();
 
     if (this.armor > 0) {
@@ -384,21 +410,19 @@ export class GameScene extends Phaser.Scene {
       this.player.takeDamage();
     } else {
       this.lives--;
-      // Create enhanced player explosion using ExplosionManager
-      this.explosionManager.createExplosion({
-        x: this.player.x,
-        y: this.player.y,
-        type: 'player',
+
+      // Clear player bullets immediately
+      this.clearPlayerBullets();
+
+      // Clear alien bullets to give player a clean slate on respawn
+      this.alienBullets.children.entries.forEach((alienBullet) => {
+        if (alienBullet.active) {
+          alienBullet.destroy();
+        }
       });
 
-      if (this.lives > 0) {
-        // Player has lives remaining - recreate player
-        this.recreatePlayer();
-        this.clearPlayerBullets();
-      } else {
-        // Game over
-        this.player.takeDamage();
-      }
+      // Start the dramatic death sequence
+      this.playerDeathSequence.startDeathSequence(this.lives);
     }
   }
 
@@ -543,6 +567,50 @@ export class GameScene extends Phaser.Scene {
     this.time.delayedCall(2000, () => {
       this.player.setInvincible(false);
     });
+  }
+
+  private recreatePlayerForDeathSequence(): void {
+    const { width, height } = this.cameras.main;
+
+    // Destroy the old player
+    if (this.player) {
+      this.player.destroy();
+    }
+
+    // Create a new player
+    this.player = new Player(this, width / 2, height - 50);
+
+    // Re-establish collision detection for the new player
+    this.setupCollisions();
+
+    // Update the death sequence with the new player reference
+    this.playerDeathSequence = new PlayerDeathSequence({
+      player: this.player,
+      explosionManager: this.explosionManager,
+      scene: this,
+      onComplete: () => {
+        // Death sequence completed
+      },
+      onRespawn: () => {
+        // Recreate player during respawn phase
+        this.recreatePlayerForDeathSequence();
+      },
+    });
+
+    // Clear any frozen UFO and reset UFO timer to allow new spawning
+    const ufo = this.alienGrid.getUfo();
+    if (ufo && ufo.active) {
+      // Destroy frozen UFO and its text
+      const numberText = ufo.getData('numberText') as Phaser.GameObjects.Text;
+      if (numberText) {
+        numberText.destroy();
+      }
+      ufo.destroy();
+      // Reset UFO reference in AlienGrid
+      this.alienGrid.clearUfo();
+    }
+
+    // Player will get invincibility from the death sequence materialization effect
   }
 
   private clearPlayerBullets(): void {
