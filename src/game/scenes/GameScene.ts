@@ -60,6 +60,11 @@ export class GameScene extends Phaser.Scene {
     super({ key: 'GameScene' });
   }
 
+  init(data: { gameMode?: 'standard' | 'calculating' }): void {
+    // Set the calculating mode based on the selected mode from menu
+    this.isCalculatingMode = data.gameMode === 'calculating';
+  }
+
   preload(): void {
     // Create improved visual assets
     this.createImprovedAssets();
@@ -71,13 +76,13 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     const { width, height } = this.cameras.main;
 
-    // Reset all game state variables
+    // Reset all game state variables (except isCalculatingMode which is set in init)
     this.score = 0;
     this.wave = 1;
     this.lives = 3;
     this.firepower = 100;
     this.armor = 0;
-    this.isCalculatingMode = false;
+    // Note: isCalculatingMode is set in init() and should not be reset here
     this.lastAlienShootTime = 0;
     this.alienShootInterval = 2000;
 
@@ -169,6 +174,22 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    // CRITICAL DEBUG: Check player physics body status every frame
+    if (!this.player.body) {
+      console.log('CRITICAL: Player physics body is missing in update loop!');
+      console.log('Player state:', {
+        visible: this.player.visible,
+        active: this.player.active,
+        alpha: this.player.alpha,
+        x: this.player.x,
+        y: this.player.y,
+      });
+
+      // Emergency recreation
+      this.physics.add.existing(this.player);
+      console.log('Emergency physics body recreation in update loop');
+    }
+
     // Update entities
     this.player.update();
     this.alienGrid.update();
@@ -244,14 +265,32 @@ export class GameScene extends Phaser.Scene {
       this
     );
 
-    // Alien bullets vs player
+    // Alien bullets vs player - CRITICAL FIX: Use custom collision callback
     this.physics.add.overlap(
       this.alienBullets,
       this.player,
       this.alienBulletHitPlayer,
-      undefined,
+      this.preCollisionCheck,
       this
     );
+  }
+
+  private preCollisionCheck(): boolean {
+    // CRITICAL FIX: Ensure player physics body exists BEFORE collision processing
+    if (!this.player.body) {
+      console.log('PRE-COLLISION: Player physics body missing - recreating');
+      this.physics.add.existing(this.player);
+
+      // Ensure physics body is properly configured
+      if (this.player.body) {
+        this.player.setCollideWorldBounds(true);
+        this.player.setImmovable(true);
+        (this.player.body as Phaser.Physics.Arcade.Body).enable = true;
+      }
+    }
+
+    // Always return true to allow collision processing
+    return true;
   }
 
   private handleInput(): void {
@@ -298,10 +337,7 @@ export class GameScene extends Phaser.Scene {
       this.playerShoot();
     }
 
-    // Toggle calculating mode
-    if (Phaser.Input.Keyboard.JustDown(this.enterKey)) {
-      this.toggleCalculatingMode();
-    }
+    // Note: Calculating mode is now set at game start and cannot be changed
   }
 
   private playerShoot(): void {
@@ -379,6 +415,10 @@ export class GameScene extends Phaser.Scene {
     this.createAlienDebris(alienSprite.x, alienSprite.y, alienData);
   }
 
+  // Add collision guard to prevent multiple collisions in rapid succession
+  private lastCollisionTime: number = 0;
+  private collisionCooldown: number = 100; // 100ms cooldown between collisions
+
   private alienBulletHitPlayer(
     bullet:
       | Phaser.Types.Physics.Arcade.GameObjectWithBody
@@ -386,29 +426,235 @@ export class GameScene extends Phaser.Scene {
       | Phaser.Physics.Arcade.StaticBody
       | Phaser.Tilemaps.Tile
   ): void {
-    const bulletSprite = bullet as Bullet;
+    // CRITICAL GUARD: Prevent multiple collisions in rapid succession
+    const currentTime = this.time.now;
+    if (currentTime - this.lastCollisionTime < this.collisionCooldown) {
+      console.log('COLLISION BLOCKED: Still in cooldown period');
+      return;
+    }
+    this.lastCollisionTime = currentTime;
+
+    // CRITICAL FIX: IMMEDIATELY ensure physics body exists at the very start
+    if (!this.player.body) {
+      console.log(
+        'IMMEDIATE FIX: Player physics body missing - recreating NOW'
+      );
+      this.physics.add.existing(this.player);
+      if (this.player.body) {
+        this.player.setCollideWorldBounds(true);
+        this.player.setImmovable(true);
+        (this.player.body as Phaser.Physics.Arcade.Body).enable = true;
+      }
+      console.log('IMMEDIATE physics body recreation completed');
+    }
+
+    // DEBUG: Log that collision method is being called
+    console.log('=== COLLISION METHOD CALLED ===');
+    console.log('Player state AT VERY START of collision method:');
+    console.log('  - visible:', this.player.visible);
+    console.log('  - active:', this.player.active);
+    console.log('  - alpha:', this.player.alpha);
+    console.log('  - armor:', this.armor);
+    console.log('  - lives:', this.lives);
+    console.log(
+      '  - death sequence active:',
+      this.playerDeathSequence.isSequenceActive()
+    );
 
     // Don't process hit if game is paused
     if (this.isPaused) {
+      console.log('COLLISION BLOCKED: Game is paused');
       return;
     }
 
     // Don't process hit if player is invincible
     if (this.player.getIsInvincible()) {
+      console.log('COLLISION BLOCKED: Player is invincible');
       return;
     }
 
     // Don't process hit if death sequence is already active
     if (this.playerDeathSequence.isSequenceActive()) {
+      console.log('COLLISION BLOCKED: Death sequence is already active');
       return;
     }
 
-    bulletSprite.destroy();
+    // CRITICAL FIX: Ensure player is visible and active BEFORE bullet destruction
+    this.player.setVisible(true);
+    this.player.setActive(true);
+    this.player.setAlpha(1);
+
+    console.log('Player state AFTER forced visibility:');
+    console.log('  - visible:', this.player.visible);
+    console.log('  - active:', this.player.active);
+    console.log('  - alpha:', this.player.alpha);
+
+    // CRITICAL FIX: Safely disable bullet first, then destroy
+    const bulletToDestroy = bullet as Bullet;
+    console.log('About to safely disable and destroy bullet...');
+    console.log(
+      'Player physics body exists before bullet processing:',
+      !!this.player.body
+    );
+
+    // Disable bullet first to prevent further collisions
+    bulletToDestroy.setActive(false);
+    bulletToDestroy.setVisible(false);
+    if (bulletToDestroy.body) {
+      bulletToDestroy.body.enable = false;
+    }
+
+    // Use delayed destruction to avoid race conditions
+    this.time.delayedCall(1, () => {
+      if (bulletToDestroy && bulletToDestroy.active === false) {
+        bulletToDestroy.destroy();
+      }
+    });
+
+    console.log(
+      'Player physics body exists after bullet processing:',
+      !!this.player.body
+    );
+
+    // CRITICAL FIX: Check if bullet processing affected player physics
+    if (!this.player.body) {
+      console.log(
+        'CRITICAL ERROR: Bullet processing destroyed player physics body!'
+      );
+      console.log('Recreating immediately');
+
+      // Emergency recreation
+      this.physics.add.existing(this.player);
+      if (this.player.body) {
+        this.player.setCollideWorldBounds(true);
+        this.player.setImmovable(true);
+        (this.player.body as Phaser.Physics.Arcade.Body).enable = true;
+      }
+      console.log('Emergency physics body recreation completed');
+    }
+
+    // ALWAYS ensure physics body is enabled and player is visible
+    if (this.player.body) {
+      this.player.body.enable = true;
+      console.log('Physics body enabled:', this.player.body.enable);
+    }
+
+    // FORCE player visibility regardless of physics body state
+    this.player.setVisible(true);
+    this.player.setActive(true);
+    this.player.setAlpha(1);
+    console.log('FORCED player visibility after physics check');
 
     if (this.armor > 0) {
+      // RADICAL FIX: Completely bypass complex armor handling when armor > 10
+      if (this.armor > 10) {
+        console.log(
+          'ARMOR > 10: Using COMPLETELY ISOLATED invincibility approach'
+        );
+        console.log('  - armor before:', this.armor);
+
+        // Simply reduce armor - NO INVINCIBILITY SYSTEM AT ALL
+        this.armor -= 10;
+        console.log('  - armor after:', this.armor);
+
+        // FORCE PLAYER VISIBILITY AND STATE
+        this.player.setVisible(true);
+        this.player.setActive(true);
+        this.player.setAlpha(1);
+        this.player.clearTint();
+
+        // Ensure physics body is enabled
+        if (this.player.body) {
+          this.player.body.enable = true;
+        }
+
+        console.log('Player state after ISOLATED processing:');
+        console.log('  - visible:', this.player.visible);
+        console.log('  - active:', this.player.active);
+        console.log('  - alpha:', this.player.alpha);
+        console.log('  - body enabled:', this.player.body?.enable);
+
+        // NO INVINCIBILITY SYSTEM - just return immediately
+        console.log('ISOLATED processing complete - no invincibility used');
+
+        return;
+      }
+
+      // Original complex handling only for armor <= 10
+      console.log('ARMOR <= 10: Using original armor handling');
       this.armor -= 10;
-      this.player.takeDamage();
+
+      // Check if armor dropped to 0 or below after taking damage
+      if (this.armor <= 0) {
+        // Armor depleted - player loses a life
+        console.log('Armor depleted after damage - player loses a life');
+        this.armor = 0; // Ensure armor doesn't go negative
+        this.lives--;
+
+        // CRITICAL FIX: Only trigger death sequence if player is actually dead (no lives left)
+        if (this.lives <= 0) {
+          console.log('Player is dead - triggering death sequence');
+
+          // Clear player bullets immediately
+          this.clearPlayerBullets();
+
+          // Clear alien bullets to give player a clean slate on respawn
+          this.alienBullets.children.entries.forEach((alienBullet) => {
+            if (alienBullet.active) {
+              alienBullet.destroy();
+            }
+          });
+
+          // Start the dramatic death sequence
+          this.playerDeathSequence.startDeathSequence(this.lives);
+        } else {
+          console.log('Player still has lives - respawning with invincibility');
+
+          // Player still has lives - just respawn with brief invincibility
+          this.player.setVisible(true);
+          this.player.setActive(true);
+          this.player.setAlpha(1);
+          this.player.clearTint();
+
+          // Ensure physics body is enabled
+          if (this.player.body) {
+            this.player.body.enable = true;
+          }
+
+          // Brief invincibility period when respawning
+          this.player.setInvincible(true);
+          this.time.delayedCall(2000, () => {
+            this.player.setInvincible(false);
+
+            // CRITICAL FIX: Force player visibility after invincibility clears
+            this.player.setVisible(true);
+            this.player.setActive(true);
+            this.player.setAlpha(1);
+
+            // Ensure physics body is still enabled
+            if (this.player.body) {
+              this.player.body.enable = true;
+            }
+
+            console.log(
+              'Respawn invincibility cleared - forced visibility restored'
+            );
+          });
+        }
+      } else {
+        // Armor absorbed the damage - use original handling for armor <= 10
+        console.log('Armor absorbed damage, remaining armor:', this.armor);
+
+        // Simple invincibility for low armor
+        this.player.setInvincible(true);
+        this.time.delayedCall(500, () => {
+          this.player.setInvincible(false);
+          console.log('Low armor invincibility cleared');
+        });
+      }
     } else {
+      // DEBUG: Log death path
+      console.log('Player death - no armor remaining');
       this.lives--;
 
       // Clear player bullets immediately
@@ -529,10 +775,6 @@ export class GameScene extends Phaser.Scene {
       bullet.setTint(0xff0000); // Red tint for alien bullets
       bullet.fire(200); // Positive velocity (downward)
     }
-  }
-
-  private toggleCalculatingMode(): void {
-    this.isCalculatingMode = !this.isCalculatingMode;
   }
 
   private recreatePlayer(): void {

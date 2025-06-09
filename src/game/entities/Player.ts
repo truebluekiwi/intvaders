@@ -55,10 +55,36 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   }
 
   takeDamage(): void {
-    // Flash effect when taking damage
+    // Ensure player remains visible and active
+    this.setVisible(true);
+    this.setActive(true);
+    this.setAlpha(1);
+
+    // Ensure physics body remains enabled
+    if (this.body) {
+      this.body.enable = true;
+    }
+
+    // Flash effect when taking damage (armor absorbed the hit)
     this.setTint(0xff0000);
     this.gameScene.time.delayedCall(100, () => {
       this.clearTint();
+      // Ensure player is still visible after tint clears
+      this.setVisible(true);
+      this.setActive(true);
+      this.setAlpha(1);
+
+      // Ensure physics body remains enabled
+      if (this.body) {
+        this.body.enable = true;
+      }
+    });
+
+    // Brief invincibility period when taking armor damage (0.5 seconds)
+    // Set invincibility directly without triggering halo effects
+    this.isInvincible = true;
+    this.gameScene.time.delayedCall(500, () => {
+      this.isInvincible = false;
     });
   }
 
