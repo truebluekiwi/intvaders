@@ -5,6 +5,7 @@ import {
   Bullet,
   ExplosionManager,
   PlayerDeathSequence,
+  ArmorShield,
 } from '../entities';
 import { WaveTransitionData } from './WaveTransitionScene';
 import { AlienType } from '../entities/AlienGrid';
@@ -30,7 +31,7 @@ export class GameScene extends Phaser.Scene {
   private armor: number = 0;
   private isCalculatingMode: boolean = false;
   private lastAlienShootTime: number = 0;
-  private alienShootInterval: number = 2000; // milliseconds
+  private alienShootInterval: number = 1200; // milliseconds - increased frequency
 
   // Wave statistics tracking
   private waveStartScore: number = 0;
@@ -160,6 +161,9 @@ export class GameScene extends Phaser.Scene {
 
     // Initialize wave statistics
     this.initializeWaveStats();
+
+    // Initialize armor shield visual
+    this.player.updateArmorShield(this.armor);
 
     // Set up event listener for wave transition
     this.events.on('startNextWave', this.handleStartNextWave, this);
@@ -407,7 +411,14 @@ export class GameScene extends Phaser.Scene {
     // Bonus armor for calculating mode kills
     if (this.isCalculatingMode) {
       if (alienData) {
-        this.armor += alienData.number; // Add armor equal to alien number
+        const armorGained = alienData.number;
+        this.armor += armorGained; // Add armor equal to alien number
+        
+        // Show armor gain visual effect
+        this.player.showArmorGainEffect(armorGained);
+        
+        // Update armor shield visual
+        this.player.updateArmorShield(this.armor);
       }
     }
 
@@ -554,8 +565,14 @@ export class GameScene extends Phaser.Scene {
         console.log('  - armor before:', this.armor);
 
         // Simply reduce armor - NO INVINCIBILITY SYSTEM AT ALL
-        this.armor -= 10;
+        this.armor -= 20;
         console.log('  - armor after:', this.armor);
+
+        // Show armor hit visual effect
+        this.player.showArmorHitEffect();
+        
+        // Update armor shield visual
+        this.player.updateArmorShield(this.armor);
 
         // FORCE PLAYER VISIBILITY AND STATE
         this.player.setVisible(true);
@@ -580,9 +597,9 @@ export class GameScene extends Phaser.Scene {
         return;
       }
 
-      // Original complex handling only for armor <= 10
-      console.log('ARMOR <= 10: Using original armor handling');
-      this.armor -= 10;
+      // Original complex handling only for armor <= 20
+      console.log('ARMOR <= 20: Using original armor handling');
+      this.armor -= 20;
 
       // Check if armor dropped to 0 or below after taking damage
       if (this.armor <= 0) {
@@ -705,7 +722,14 @@ export class GameScene extends Phaser.Scene {
 
         // Special UFO bonus armor
         if (this.isCalculatingMode) {
-          this.armor += 50; // UFO gives big armor bonus
+          const armorGained = 50;
+          this.armor += armorGained; // UFO gives big armor bonus
+          
+          // Show armor gain visual effect
+          this.player.showArmorGainEffect(armorGained);
+          
+          // Update armor shield visual
+          this.player.updateArmorShield(this.armor);
         }
 
         // Create special explosion for UFO using ExplosionManager
@@ -722,8 +746,8 @@ export class GameScene extends Phaser.Scene {
     if (this.time.now - this.lastAlienShootTime > this.alienShootInterval) {
       this.alienShoot();
       this.lastAlienShootTime = this.time.now;
-      // Increase shooting frequency as waves progress
-      this.alienShootInterval = Math.max(800, 2000 - this.wave * 100);
+      // Increase shooting frequency as waves progress - more aggressive
+      this.alienShootInterval = Math.max(600, 1200 - this.wave * 80);
     }
   }
 

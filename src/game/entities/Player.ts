@@ -1,4 +1,5 @@
-import * as Phaser from 'phaser';
+dimport * as Phaser from 'phaser';
+import { ArmorShield } from './ArmorShield';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
   private speed: number = 200;
@@ -10,6 +11,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private haloEffect: Phaser.GameObjects.Arc | null = null;
   private haloTween: Phaser.Tweens.Tween | null = null;
   private haloParticles: Phaser.GameObjects.Arc[] = [];
+  private armorShield: ArmorShield;
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
     super(scene, x, y, 'player');
@@ -30,10 +32,14 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
 
     // Set origin to center
     this.setOrigin(0.5, 0.5);
+
+    // Initialize armor shield
+    this.armorShield = new ArmorShield(scene, this);
   }
 
   update(): void {
-    // Player update logic (if needed)
+    // Update armor shield
+    this.armorShield.update();
   }
 
   moveLeft(): void {
@@ -300,7 +306,25 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     this.haloParticles = [];
   }
 
+  // Armor shield methods
+  updateArmorShield(armor: number): void {
+    this.armorShield.updateArmor(armor);
+  }
+
+  showArmorHitEffect(): void {
+    this.armorShield.showHitEffect();
+  }
+
+  showArmorGainEffect(armorGained: number): void {
+    this.armorShield.showArmorGainEffect(armorGained);
+  }
+
   destroy(): void {
+    // Clean up armor shield
+    if (this.armorShield) {
+      this.armorShield.destroy();
+    }
+
     // Clean up halo effects
     this.clearHaloEffect();
 
