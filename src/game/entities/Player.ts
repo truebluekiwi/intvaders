@@ -1,4 +1,4 @@
-dimport * as Phaser from 'phaser';
+import * as Phaser from 'phaser';
 import { ArmorShield } from './ArmorShield';
 
 export class Player extends Phaser.Physics.Arcade.Sprite {
