@@ -5,7 +5,6 @@ import {
   Bullet,
   ExplosionManager,
   PlayerDeathSequence,
-  ArmorShield,
 } from '../entities';
 import { WaveTransitionData } from './WaveTransitionScene';
 import { AlienType } from '../entities/AlienGrid';
@@ -413,10 +412,10 @@ export class GameScene extends Phaser.Scene {
       if (alienData) {
         const armorGained = alienData.number;
         this.armor += armorGained; // Add armor equal to alien number
-        
+
         // Show armor gain visual effect
         this.player.showArmorGainEffect(armorGained);
-        
+
         // Update armor shield visual
         this.player.updateArmorShield(this.armor);
       }
@@ -570,7 +569,7 @@ export class GameScene extends Phaser.Scene {
 
         // Show armor hit visual effect
         this.player.showArmorHitEffect();
-        
+
         // Update armor shield visual
         this.player.updateArmorShield(this.armor);
 
@@ -724,10 +723,10 @@ export class GameScene extends Phaser.Scene {
         if (this.isCalculatingMode) {
           const armorGained = 50;
           this.armor += armorGained; // UFO gives big armor bonus
-          
+
           // Show armor gain visual effect
           this.player.showArmorGainEffect(armorGained);
-          
+
           // Update armor shield visual
           this.player.updateArmorShield(this.armor);
         }
