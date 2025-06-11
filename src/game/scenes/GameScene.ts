@@ -974,23 +974,34 @@ export class GameScene extends Phaser.Scene {
   }
 
   private createUI(): void {
-    const padding = 20;
+    const topY = 10; // Single row at top of screen
+    const { width } = this.cameras.main;
 
-    this.scoreText = this.add.text(padding, padding, `Score: ${this.score}`, {
+    // Calculate horizontal positions for status elements
+    const statusStartX = 20;
+    const statusSpacing = this.isCalculatingMode ? 100 : 120; // Tighter spacing when armor is shown
+
+    // Left side status elements (horizontal layout)
+    this.scoreText = this.add.text(statusStartX, topY, `Score: ${this.score}`, {
       fontSize: '18px',
       color: '#ffffff',
       fontFamily: 'Arial, sans-serif',
     });
 
-    this.waveText = this.add.text(padding, padding + 25, `Wave: ${this.wave}`, {
-      fontSize: '18px',
-      color: '#ffffff',
-      fontFamily: 'Arial, sans-serif',
-    });
+    this.waveText = this.add.text(
+      statusStartX + statusSpacing,
+      topY,
+      `Wave: ${this.wave}`,
+      {
+        fontSize: '18px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
 
     this.livesText = this.add.text(
-      padding,
-      padding + 50,
+      statusStartX + statusSpacing * 2,
+      topY,
       `Lives: ${this.lives}`,
       {
         fontSize: '18px',
@@ -1000,9 +1011,9 @@ export class GameScene extends Phaser.Scene {
     );
 
     this.firepowerText = this.add.text(
-      padding,
-      padding + 75,
-      `FPP: ${this.firepower}`,
+      statusStartX + statusSpacing * 3,
+      topY,
+      `Firepower: ${this.firepower}`,
       {
         fontSize: '18px',
         color: '#00ff00',
@@ -1010,20 +1021,28 @@ export class GameScene extends Phaser.Scene {
       }
     );
 
-    this.armorText = this.add.text(
-      padding,
-      padding + 100,
-      `Armor: ${this.armor}`,
-      {
-        fontSize: '18px',
-        color: '#0088ff',
-        fontFamily: 'Arial, sans-serif',
-      }
-    );
+    // Armor text - only create and show in calculating mode
+    if (this.isCalculatingMode) {
+      this.armorText = this.add.text(
+        statusStartX + statusSpacing * 4,
+        topY,
+        `Armor: ${this.armor}`,
+        {
+          fontSize: '18px',
+          color: '#0088ff',
+          fontFamily: 'Arial, sans-serif',
+        }
+      );
+    } else {
+      // Create invisible placeholder for standard mode to avoid null reference errors
+      this.armorText = this.add.text(0, 0, '', { fontSize: '1px' });
+      this.armorText.setVisible(false);
+    }
 
+    // Right side elements
     this.modeText = this.add.text(
-      this.cameras.main.width - padding,
-      padding,
+      width - 20,
+      topY,
       this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE',
       {
         fontSize: '16px',
@@ -1033,10 +1052,10 @@ export class GameScene extends Phaser.Scene {
     );
     this.modeText.setOrigin(1, 0);
 
-    // Pause time display
+    // Pause time display (positioned below mode text)
     this.pauseTimeText = this.add.text(
-      this.cameras.main.width - padding,
-      padding + 25,
+      width - 20,
+      topY + 20,
       this.formatPauseTimeDisplay(),
       {
         fontSize: '14px',
@@ -1051,8 +1070,13 @@ export class GameScene extends Phaser.Scene {
     this.scoreText.setText(`Score: ${this.score}`);
     this.waveText.setText(`Wave: ${this.wave}`);
     this.livesText.setText(`Lives: ${this.lives}`);
-    this.firepowerText.setText(`FPP: ${this.firepower}`);
-    this.armorText.setText(`Armor: ${this.armor}`);
+    this.firepowerText.setText(`Firepower: ${this.firepower}`);
+
+    // Only update armor text in calculating mode
+    if (this.isCalculatingMode) {
+      this.armorText.setText(`Armor: ${this.armor}`);
+    }
+
     this.modeText.setText(
       this.isCalculatingMode ? 'CALCULATING MODE' : 'STANDARD MODE'
     );
