@@ -27,10 +27,16 @@ export class AlienGrid {
   private wave: number;
   private lastUfoTime: number = 0;
   private ufoInterval: number = 25000; // UFO appears every 25 seconds
+  private isCalculatingMode: boolean;
 
-  constructor(scene: Phaser.Scene, wave: number) {
+  constructor(
+    scene: Phaser.Scene,
+    wave: number,
+    isCalculatingMode: boolean = false
+  ) {
     this.scene = scene;
     this.wave = wave;
+    this.isCalculatingMode = isCalculatingMode;
     this.aliens = scene.physics.add.group();
 
     // Adjust difficulty based on wave
@@ -72,22 +78,27 @@ export class AlienGrid {
         alien.setData('alienData', alienData);
         alien.setData('health', alienData.health);
 
-        // Add number text overlay for mathematical gameplay
-        const numberText = this.scene.add.text(
-          x,
-          y + 15,
-          alienNumber.toString(),
-          {
-            fontSize: '12px',
-            color: '#00ff00',
-            fontFamily: 'monospace',
-            fontStyle: 'bold',
-            stroke: '#000000',
-            strokeThickness: 2,
-          }
-        );
-        numberText.setOrigin(0.5, 0.5);
-        alien.setData('numberText', numberText);
+        // Add number text overlay only for calculating mode
+        if (this.isCalculatingMode) {
+          const numberText = this.scene.add.text(
+            x,
+            y + 15,
+            alienNumber.toString(),
+            {
+              fontSize: '12px',
+              color: '#00ff00',
+              fontFamily: 'monospace',
+              fontStyle: 'bold',
+              stroke: '#000000',
+              strokeThickness: 2,
+            }
+          );
+          numberText.setOrigin(0.5, 0.5);
+          alien.setData('numberText', numberText);
+        } else {
+          // In standard mode, set numberText to null
+          alien.setData('numberText', null);
+        }
 
         this.aliens.add(alien);
       }
@@ -252,17 +263,22 @@ export class AlienGrid {
     this.ufo.setData('alienData', alienData);
     this.ufo.setData('health', alienData.health);
 
-    // Add number text (0 for UFO)
-    const numberText = this.scene.add.text(x, y + 15, '0', {
-      fontSize: '12px',
-      color: '#ffff00', // Yellow for UFO
-      fontFamily: 'monospace',
-      fontStyle: 'bold',
-      stroke: '#000000',
-      strokeThickness: 2,
-    });
-    numberText.setOrigin(0.5, 0.5);
-    this.ufo.setData('numberText', numberText);
+    // Add number text only for calculating mode
+    if (this.isCalculatingMode) {
+      const numberText = this.scene.add.text(x, y + 15, '0', {
+        fontSize: '12px',
+        color: '#ffff00', // Yellow for UFO
+        fontFamily: 'monospace',
+        fontStyle: 'bold',
+        stroke: '#000000',
+        strokeThickness: 2,
+      });
+      numberText.setOrigin(0.5, 0.5);
+      this.ufo.setData('numberText', numberText);
+    } else {
+      // In standard mode, set numberText to null
+      this.ufo.setData('numberText', null);
+    }
   }
 
   private moveGrid(): void {

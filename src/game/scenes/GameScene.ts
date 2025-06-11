@@ -127,7 +127,7 @@ export class GameScene extends Phaser.Scene {
     });
 
     this.player = new Player(this, width / 2, height - 50);
-    this.alienGrid = new AlienGrid(this, this.wave);
+    this.alienGrid = new AlienGrid(this, this.wave, this.isCalculatingMode);
 
     // Initialize explosion manager
     this.explosionManager = new ExplosionManager(this);
@@ -1672,7 +1672,7 @@ export class GameScene extends Phaser.Scene {
 
   private handleStartNextWave(data: { wave: number }): void {
     // Create new alien grid for the next wave
-    this.alienGrid = new AlienGrid(this, data.wave);
+    this.alienGrid = new AlienGrid(this, data.wave, this.isCalculatingMode);
 
     // Re-establish collision detection for new alien grid
     this.setupCollisions();
