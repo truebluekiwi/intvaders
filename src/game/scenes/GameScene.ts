@@ -564,7 +564,7 @@ export class GameScene extends Phaser.Scene {
         console.log('  - armor before:', this.armor);
 
         // Simply reduce armor - NO INVINCIBILITY SYSTEM AT ALL
-        this.armor -= 20;
+        this.armor = Math.max(0, this.armor - 20);
         console.log('  - armor after:', this.armor);
 
         // Show armor hit visual effect
@@ -598,13 +598,13 @@ export class GameScene extends Phaser.Scene {
 
       // Original complex handling only for armor <= 20
       console.log('ARMOR <= 20: Using original armor handling');
-      this.armor -= 20;
+      this.armor = Math.max(0, this.armor - 20);
 
       // Check if armor dropped to 0 or below after taking damage
       if (this.armor <= 0) {
         // Armor depleted - player loses a life
         console.log('Armor depleted after damage - player loses a life');
-        this.armor = 0; // Ensure armor doesn't go negative
+        // Armor is already clamped to 0 by Math.max above
         this.lives--;
 
         // CRITICAL FIX: Only trigger death sequence if player is actually dead (no lives left)
