@@ -26,7 +26,12 @@ export class GameScene extends Phaser.Scene {
   private score: number = 0;
   private wave: number = 1;
   private lives: number = 3;
-  private firepower: number = 100;
+  private baseFirepower: number = 20; // Base level that never drops below
+  private firepower: number = 20; // Current firepower level
+  private maxFirepower: number = 100; // Normal maximum firepower
+  private ultimatePowerActive: boolean = false;
+  private ultimateEndTime: number = 0;
+  private ultimateDuration: number = 30000; // 30 seconds
   private armor: number = 0;
   private isCalculatingMode: boolean = false;
   private lastAlienShootTime: number = 0;
@@ -52,6 +57,8 @@ export class GameScene extends Phaser.Scene {
   private waveText!: Phaser.GameObjects.Text;
   private livesText!: Phaser.GameObjects.Text;
   private firepowerText!: Phaser.GameObjects.Text;
+  private firepowerLevelText!: Phaser.GameObjects.Text;
+  private ultimateTimerText!: Phaser.GameObjects.Text;
   private armorText!: Phaser.GameObjects.Text;
   private modeText!: Phaser.GameObjects.Text;
   private pauseTimeText!: Phaser.GameObjects.Text;
@@ -80,7 +87,11 @@ export class GameScene extends Phaser.Scene {
     this.score = 0;
     this.wave = 1;
     this.lives = 3;
-    this.firepower = 100;
+    this.baseFirepower = 20;
+    this.firepower = 20; // Start at base level
+    this.maxFirepower = 100;
+    this.ultimatePowerActive = false;
+    this.ultimateEndTime = 0;
     this.armor = 0;
     // Note: isCalculatingMode is set in init() and should not be reset here
     this.lastAlienShootTime = 0;
@@ -192,6 +203,9 @@ export class GameScene extends Phaser.Scene {
       this.physics.add.existing(this.player);
       console.log('Emergency physics body recreation in update loop');
     }
+
+    // Handle ultimate power timer
+    this.updateUltimatePower();
 
     // Update entities
     this.player.update();
@@ -363,8 +377,149 @@ export class GameScene extends Phaser.Scene {
   private createBullet(x: number, y: number, velocityY: number): void {
     const bullet = this.bullets.get(x, y, 'bullet') as Bullet;
     if (bullet) {
+      // Apply firepower-based visual effects
+      this.applyFirepowerEffects(bullet);
       bullet.fire(velocityY);
     }
+  }
+
+  private applyFirepowerEffects(bullet: Bullet): void {
+    const level = this.getFirepowerLevel();
+
+    // Clear any existing effects
+    bullet.clearTint();
+    bullet.setScale(1);
+
+    switch (level) {
+      case 1: // Basic - Blue bullets, normal size
+        bullet.setTint(0x0088ff);
+        bullet.setScale(1);
+        break;
+      case 2: // Enhanced - Green bullets, slightly larger
+        bullet.setTint(0x00ff00);
+        bullet.setScale(1.2);
+        break;
+      case 3: // Advanced - Yellow bullets, larger with glow
+        bullet.setTint(0xffff00);
+        bullet.setScale(1.4);
+        this.createBulletGlow(bullet, 0xffff00);
+        break;
+      case 4: // Superior - Orange bullets, large with trail
+        bullet.setTint(0xff8800);
+        bullet.setScale(1.6);
+        this.createBulletTrail(bullet, 0xff8800);
+        break;
+      case 5: // Maximum - Red bullets, very large with particle trail
+        bullet.setTint(0xff0000);
+        bullet.setScale(1.8);
+        this.createBulletParticleTrail(bullet, 0xff0000);
+        break;
+      case 6: // Ultimate - White/electric bullets, massive with lightning
+        bullet.setTint(0xffffff);
+        bullet.setScale(2.0);
+        this.createBulletLightningEffect(bullet);
+        break;
+    }
+  }
+
+  private createBulletGlow(bullet: Bullet, color: number): void {
+    const glow = this.add.circle(bullet.x, bullet.y, 8, color, 0.3);
+    glow.setDepth(bullet.depth - 1);
+
+    // Make glow follow bullet
+    this.tweens.add({
+      targets: glow,
+      alpha: 0,
+      duration: 200,
+      onUpdate: () => {
+        if (bullet.active) {
+          glow.setPosition(bullet.x, bullet.y);
+        }
+      },
+      onComplete: () => glow.destroy(),
+    });
+  }
+
+  private createBulletTrail(bullet: Bullet, color: number): void {
+    // Create trail particles
+    for (let i = 0; i < 3; i++) {
+      this.time.delayedCall(i * 50, () => {
+        if (bullet.active) {
+          const trail = this.add.circle(bullet.x, bullet.y, 3, color, 0.6);
+          trail.setDepth(bullet.depth - 1);
+
+          this.tweens.add({
+            targets: trail,
+            alpha: 0,
+            scaleX: 0.2,
+            scaleY: 0.2,
+            duration: 300,
+            onComplete: () => trail.destroy(),
+          });
+        }
+      });
+    }
+  }
+
+  private createBulletParticleTrail(bullet: Bullet, color: number): void {
+    // Create more intense particle trail
+    for (let i = 0; i < 5; i++) {
+      this.time.delayedCall(i * 30, () => {
+        if (bullet.active) {
+          const particle = this.add.circle(
+            bullet.x + (Math.random() - 0.5) * 4,
+            bullet.y + (Math.random() - 0.5) * 4,
+            2,
+            color,
+            0.8
+          );
+          particle.setDepth(bullet.depth - 1);
+
+          this.tweens.add({
+            targets: particle,
+            alpha: 0,
+            scaleX: 0.1,
+            scaleY: 0.1,
+            duration: 400,
+            onComplete: () => particle.destroy(),
+          });
+        }
+      });
+    }
+  }
+
+  private createBulletLightningEffect(bullet: Bullet): void {
+    // Create electric/lightning effect for ultimate power
+    const lightning = this.add.graphics();
+    lightning.lineStyle(2, 0xffffff, 0.8);
+    lightning.setDepth(bullet.depth + 1);
+
+    // Draw lightning bolts around bullet
+    for (let i = 0; i < 4; i++) {
+      const angle = (i / 4) * Math.PI * 2;
+      const startX = bullet.x + Math.cos(angle) * 5;
+      const startY = bullet.y + Math.sin(angle) * 5;
+      const endX = bullet.x + Math.cos(angle) * 12;
+      const endY = bullet.y + Math.sin(angle) * 12;
+
+      lightning.beginPath();
+      lightning.moveTo(startX, startY);
+      lightning.lineTo(endX, endY);
+      lightning.strokePath();
+    }
+
+    // Animate lightning
+    this.tweens.add({
+      targets: lightning,
+      alpha: 0,
+      duration: 150,
+      onUpdate: () => {
+        if (bullet.active) {
+          lightning.setPosition(0, 0);
+        }
+      },
+      onComplete: () => lightning.destroy(),
+    });
   }
 
   private bulletHitAlien(
@@ -387,6 +542,14 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
+    // CRITICAL DEBUG: Log collision processing
+    console.log('=== BULLET HIT ALIEN DEBUG ===');
+    console.log('Firepower:', this.firepower);
+    console.log('Alien state BEFORE damage:');
+    console.log('  - visible:', alienSprite.visible);
+    console.log('  - active:', alienSprite.active);
+    console.log('  - alpha:', alienSprite.alpha);
+
     bulletSprite.destroy();
 
     // Play hit sound
@@ -395,34 +558,65 @@ export class GameScene extends Phaser.Scene {
     // Get alien data before destroying
     const alienData = alienSprite.getData('alienData');
 
-    // Track alien destruction for statistics
-    this.trackAlienDestruction(alienData);
-
-    // Destroy alien and get score using new scoring system
-    // Pass calculating mode flag for bonus scoring
-    const scoreEarned = this.alienGrid.getAlienScore(
-      alienSprite,
-      this.isCalculatingMode
+    // Calculate damage based on current firepower and alien type
+    const damage = this.alienGrid.calculateDamage(
+      this.firepower,
+      alienData.type
     );
-    this.alienGrid.destroyAlien(alienSprite);
+
+    console.log('Calculated damage:', damage);
+    console.log('About to call destroyAlien...');
+
+    // Apply damage and get score if alien is destroyed
+    const scoreEarned = this.alienGrid.destroyAlien(alienSprite, damage);
+
+    console.log('destroyAlien returned score:', scoreEarned);
+    console.log('Alien state AFTER destroyAlien:');
+    console.log('  - visible:', alienSprite.visible);
+    console.log('  - active:', alienSprite.active);
+    console.log('  - alpha:', alienSprite.alpha);
+    console.log('  - exists:', !!alienSprite);
+
     this.score += scoreEarned;
 
-    // Bonus armor for calculating mode kills
-    if (this.isCalculatingMode) {
-      if (alienData) {
-        const armorGained = alienData.number;
-        this.armor += armorGained; // Add armor equal to alien number
+    // CRITICAL FIX: Only process additional effects if alien is still alive
+    if (scoreEarned === 0 && alienSprite.active) {
+      console.log('Alien survived - no additional processing');
 
-        // Show armor gain visual effect
-        this.player.showArmorGainEffect(armorGained);
+      // FORCE alien visibility after damage processing
+      alienSprite.setVisible(true);
+      alienSprite.setActive(true);
+      alienSprite.setAlpha(1);
 
-        // Update armor shield visual
-        this.player.updateArmorShield(this.armor);
+      console.log('Alien state AFTER forced visibility:');
+      console.log('  - visible:', alienSprite.visible);
+      console.log('  - active:', alienSprite.active);
+      console.log('  - alpha:', alienSprite.alpha);
+    } else if (scoreEarned > 0) {
+      console.log('Alien destroyed - processing destruction effects');
+
+      // Track alien destruction for statistics
+      this.trackAlienDestruction(alienData);
+
+      // Bonus armor for calculating mode kills
+      if (this.isCalculatingMode) {
+        if (alienData) {
+          const armorGained = alienData.number;
+          this.armor += armorGained; // Add armor equal to alien number
+
+          // Show armor gain visual effect
+          this.player.showArmorGainEffect(armorGained);
+
+          // Update armor shield visual
+          this.player.updateArmorShield(this.armor);
+        }
       }
+
+      // Enhanced alien destruction effect with type-specific debris
+      this.createAlienDebris(alienSprite.x, alienSprite.y, alienData);
     }
 
-    // Enhanced alien destruction effect with type-specific debris
-    this.createAlienDebris(alienSprite.x, alienSprite.y, alienData);
+    console.log('=== END BULLET HIT ALIEN DEBUG ===');
   }
 
   // Add collision guard to prevent multiple collisions in rapid succession
@@ -719,6 +913,9 @@ export class GameScene extends Phaser.Scene {
         this.alienGrid.destroyAlien(ufo);
         this.score += scoreEarned;
 
+        // Activate ultimate power when UFO is hit
+        this.activateUltimatePower();
+
         // Special UFO bonus armor
         if (this.isCalculatingMode) {
           const armorGained = 50;
@@ -902,7 +1099,12 @@ export class GameScene extends Phaser.Scene {
     // Calculate wave statistics
     const waveScore = this.score - this.waveStartScore;
     const bonusScore = this.wave * 100;
-    const newFirepower = Math.min(100, this.firepower + 20);
+
+    // New firepower progression: +5 per wave, capped at maxFirepower
+    const newFirepower = Math.min(
+      this.maxFirepower,
+      this.baseFirepower + this.wave * 5
+    );
 
     // Prepare transition data
     const transitionData: WaveTransitionData = {
@@ -1016,10 +1218,36 @@ export class GameScene extends Phaser.Scene {
       `Firepower: ${this.firepower}`,
       {
         fontSize: '18px',
-        color: '#00ff00',
+        color: this.getFirepowerColor(),
         fontFamily: 'Arial, sans-serif',
       }
     );
+
+    // Firepower level indicator
+    this.firepowerLevelText = this.add.text(
+      statusStartX + statusSpacing * 3,
+      topY + 20,
+      this.getFirepowerLevelName(),
+      {
+        fontSize: '12px',
+        color: this.getFirepowerColor(),
+        fontFamily: 'Arial, sans-serif',
+      }
+    );
+
+    // Ultimate power timer (initially hidden)
+    this.ultimateTimerText = this.add.text(
+      statusStartX + statusSpacing * 3,
+      topY + 35,
+      '',
+      {
+        fontSize: '14px',
+        color: '#ffffff',
+        fontFamily: 'Arial, sans-serif',
+        fontStyle: 'bold',
+      }
+    );
+    this.ultimateTimerText.setVisible(false);
 
     // Armor text - only create and show in calculating mode
     if (this.isCalculatingMode) {
@@ -1071,6 +1299,23 @@ export class GameScene extends Phaser.Scene {
     this.waveText.setText(`Wave: ${this.wave}`);
     this.livesText.setText(`Lives: ${this.lives}`);
     this.firepowerText.setText(`Firepower: ${this.firepower}`);
+    this.firepowerText.setColor(this.getFirepowerColor());
+
+    // Update firepower level indicator
+    this.firepowerLevelText.setText(this.getFirepowerLevelName());
+    this.firepowerLevelText.setColor(this.getFirepowerColor());
+
+    // Update ultimate power timer
+    if (this.ultimatePowerActive) {
+      const remainingTime = Math.max(
+        0,
+        Math.ceil((this.ultimateEndTime - this.time.now) / 1000)
+      );
+      this.ultimateTimerText.setText(`ULTIMATE: ${remainingTime}s`);
+      this.ultimateTimerText.setVisible(true);
+    } else {
+      this.ultimateTimerText.setVisible(false);
+    }
 
     // Only update armor text in calculating mode
     if (this.isCalculatingMode) {
@@ -1691,6 +1936,172 @@ export class GameScene extends Phaser.Scene {
           repeat: 8,
         });
       }
+    }
+  }
+
+  private updateUltimatePower(): void {
+    // Check if ultimate power should end
+    if (this.ultimatePowerActive && this.time.now >= this.ultimateEndTime) {
+      this.endUltimatePower();
+    }
+  }
+
+  private previousFirepower: number = 0;
+
+  private activateUltimatePower(): void {
+    // Store current firepower level to restore later
+    this.previousFirepower = this.firepower;
+
+    // Activate ultimate power
+    this.ultimatePowerActive = true;
+    this.firepower = 200; // Ultimate firepower level
+    this.ultimateEndTime = this.time.now + this.ultimateDuration;
+
+    // Create screen edge glow effect
+    this.createUltimateScreenEffect();
+
+    // Play ultimate power sound
+    this.playSound('ultimatePowerSound');
+  }
+
+  private endUltimatePower(): void {
+    this.ultimatePowerActive = false;
+
+    // Restore previous firepower level
+    const restoredFirepower =
+      this.previousFirepower || this.baseFirepower + (this.wave - 1) * 5;
+    this.firepower = Math.max(
+      this.baseFirepower,
+      Math.min(this.maxFirepower, restoredFirepower)
+    );
+
+    // Clear ultimate screen effects
+    this.clearUltimateScreenEffect();
+  }
+
+  private createUltimateScreenEffect(): void {
+    // Create pulsing screen edge glow
+    const { width, height } = this.cameras.main;
+
+    // Create glow rectangles around screen edges
+    const glowThickness = 10;
+    const glowColor = 0x00ffff;
+    const glowAlpha = 0.3;
+
+    // Top edge
+    const topGlow = this.add.rectangle(
+      width / 2,
+      glowThickness / 2,
+      width,
+      glowThickness,
+      glowColor,
+      glowAlpha
+    );
+    topGlow.setDepth(1000);
+    topGlow.setData('ultimateEffect', true);
+
+    // Bottom edge
+    const bottomGlow = this.add.rectangle(
+      width / 2,
+      height - glowThickness / 2,
+      width,
+      glowThickness,
+      glowColor,
+      glowAlpha
+    );
+    bottomGlow.setDepth(1000);
+    bottomGlow.setData('ultimateEffect', true);
+
+    // Left edge
+    const leftGlow = this.add.rectangle(
+      glowThickness / 2,
+      height / 2,
+      glowThickness,
+      height,
+      glowColor,
+      glowAlpha
+    );
+    leftGlow.setDepth(1000);
+    leftGlow.setData('ultimateEffect', true);
+
+    // Right edge
+    const rightGlow = this.add.rectangle(
+      width - glowThickness / 2,
+      height / 2,
+      glowThickness,
+      height,
+      glowColor,
+      glowAlpha
+    );
+    rightGlow.setDepth(1000);
+    rightGlow.setData('ultimateEffect', true);
+
+    // Create pulsing animation
+    this.tweens.add({
+      targets: [topGlow, bottomGlow, leftGlow, rightGlow],
+      alpha: { from: 0.3, to: 0.8 },
+      duration: 500,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+    });
+  }
+
+  private clearUltimateScreenEffect(): void {
+    // Remove all ultimate effect objects
+    this.children.list.forEach((child) => {
+      if (child.getData && child.getData('ultimateEffect')) {
+        child.destroy();
+      }
+    });
+  }
+
+  private getFirepowerLevel(): number {
+    if (this.ultimatePowerActive) return 6; // Ultimate level
+    if (this.firepower >= 81) return 5; // Maximum level
+    if (this.firepower >= 66) return 4; // Superior level
+    if (this.firepower >= 51) return 3; // Advanced level
+    if (this.firepower >= 36) return 2; // Enhanced level
+    return 1; // Basic level
+  }
+
+  private getFirepowerColor(): string {
+    const level = this.getFirepowerLevel();
+    switch (level) {
+      case 1:
+        return '#0088ff'; // Blue
+      case 2:
+        return '#00ff00'; // Green
+      case 3:
+        return '#ffff00'; // Yellow
+      case 4:
+        return '#ff8800'; // Orange
+      case 5:
+        return '#ff0000'; // Red
+      case 6:
+        return '#ffffff'; // White (Ultimate)
+      default:
+        return '#0088ff';
+    }
+  }
+
+  private getFirepowerLevelName(): string {
+    const level = this.getFirepowerLevel();
+    switch (level) {
+      case 1:
+        return 'BASIC';
+      case 2:
+        return 'ENHANCED';
+      case 3:
+        return 'ADVANCED';
+      case 4:
+        return 'SUPERIOR';
+      case 5:
+        return 'MAXIMUM';
+      case 6:
+        return 'ULTIMATE';
+      default:
+        return 'BASIC';
     }
   }
 
