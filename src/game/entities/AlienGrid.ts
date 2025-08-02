@@ -240,6 +240,15 @@ export class AlienGrid {
         if (numberText) {
           numberText.destroy();
         }
+
+        // Clean up color cycle timer
+        const colorCycleTimer = this.ufo.getData(
+          'colorCycleTimer'
+        ) as Phaser.Time.TimerEvent;
+        if (colorCycleTimer) {
+          colorCycleTimer.destroy();
+        }
+
         this.ufo.destroy();
         this.ufo = null;
       } else {
@@ -267,6 +276,9 @@ export class AlienGrid {
     // Store alien data
     this.ufo.setData('alienData', alienData);
     this.ufo.setData('health', alienData.health);
+
+    // Add flashing effect to UFO
+    this.createUfoFlashingEffect();
 
     // Add number text only for calculating mode
     if (this.isCalculatingMode) {
@@ -371,6 +383,13 @@ export class AlienGrid {
 
       // Check if this is the UFO
       if (alienData.type === AlienType.UFO) {
+        // Clean up color cycle timer
+        const colorCycleTimer = alien.getData(
+          'colorCycleTimer'
+        ) as Phaser.Time.TimerEvent;
+        if (colorCycleTimer) {
+          colorCycleTimer.destroy();
+        }
         this.ufo = null; // Clear UFO reference
       }
 
@@ -658,6 +677,40 @@ export class AlienGrid {
   private createFlickerEffect(alien: Phaser.Physics.Arcade.Sprite): void {
     // Legacy method - replaced by new damage effects but kept for compatibility
     this.createModerateDamageEffect(alien);
+  }
+
+  private createUfoFlashingEffect(): void {
+    if (!this.ufo) return;
+
+    // Create a continuous flashing effect for the UFO
+    this.scene.tweens.add({
+      targets: this.ufo,
+      alpha: { from: 1.0, to: 0.3 },
+      duration: 300,
+      ease: 'Sine.easeInOut',
+      yoyo: true,
+      repeat: -1,
+    });
+
+    // Add a color cycling effect
+    const colors = [0xffffff, 0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff];
+    let colorIndex = 0;
+
+    const colorCycleTimer = this.scene.time.addEvent({
+      delay: 200,
+      callback: () => {
+        if (this.ufo && this.ufo.active) {
+          this.ufo.setTint(colors[colorIndex]);
+          colorIndex = (colorIndex + 1) % colors.length;
+        } else {
+          colorCycleTimer.destroy();
+        }
+      },
+      loop: true,
+    });
+
+    // Store the timer reference for cleanup
+    this.ufo.setData('colorCycleTimer', colorCycleTimer);
   }
 
   public calculateDamage(firepower: number, alienType: AlienType): number {
